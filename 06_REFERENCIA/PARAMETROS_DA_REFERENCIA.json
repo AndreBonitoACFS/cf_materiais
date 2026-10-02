@@ -1,0 +1,318 @@
+{
+  "referencia_sha256": "22e1fa3d6f747126aead26cd5df4258e5f1f2bd268ae0d0d970ef30775bcb139",
+  "periodo": 2027,
+  "nota": "Valores salvos extraídos da referência; não constituem homologação jurídica. null é ausência de configuração, não zero. CBS regular provisória. Faixas e partilhas exigem sua regra temporal e limites próprios.",
+  "parametros": [
+    {
+      "celula": "C15",
+      "rotulo": "Alíquota do IBS em 2027",
+      "valor_salvo": 0.001
+    },
+    {
+      "celula": "C16",
+      "rotulo": "Alíquota da CBS em 2027",
+      "valor_salvo": 0.088
+    },
+    {
+      "celula": "C17",
+      "rotulo": "IBS + CBS",
+      "valor_salvo": 0.089
+    },
+    {
+      "celula": "C21",
+      "rotulo": "Presunção IRPJ — comércio (CF Principal)",
+      "valor_salvo": 0.08
+    },
+    {
+      "celula": "C22",
+      "rotulo": "Presunção CSLL — comércio (CF Principal)",
+      "valor_salvo": 0.12
+    },
+    {
+      "celula": "C23",
+      "rotulo": "Presunção IRPJ — armazenagem (serviços)",
+      "valor_salvo": 0.32
+    },
+    {
+      "celula": "C24",
+      "rotulo": "Presunção CSLL — armazenagem (serviços)",
+      "valor_salvo": 0.32
+    },
+    {
+      "celula": "C25",
+      "rotulo": "Presunção IRPJ — logística (transporte de cargas)",
+      "valor_salvo": 0.08
+    },
+    {
+      "celula": "C26",
+      "rotulo": "Presunção CSLL — logística (transporte de cargas)",
+      "valor_salvo": 0.12
+    },
+    {
+      "celula": "C27",
+      "rotulo": "LC 224/2025 — receita bruta anual acima da qual se aplica o acréscimo",
+      "valor_salvo": 5000000
+    },
+    {
+      "celula": "C28",
+      "rotulo": "LC 224/2025 — acréscimo nos percentuais de presunção",
+      "valor_salvo": 0.1
+    },
+    {
+      "celula": "C29",
+      "rotulo": "Alíquota do IRPJ",
+      "valor_salvo": 0.15
+    },
+    {
+      "celula": "C30",
+      "rotulo": "Adicional do IRPJ",
+      "valor_salvo": 0.1
+    },
+    {
+      "celula": "C31",
+      "rotulo": "Parcela anual isenta do adicional",
+      "valor_salvo": 240000
+    },
+    {
+      "celula": "C32",
+      "rotulo": "Alíquota da CSLL",
+      "valor_salvo": 0.09
+    },
+    {
+      "celula": "C33",
+      "rotulo": "PIS em 2027",
+      "valor_salvo": 0
+    },
+    {
+      "celula": "C34",
+      "rotulo": "COFINS em 2027",
+      "valor_salvo": 0
+    },
+    {
+      "celula": "C35",
+      "rotulo": "ISS — armazenagem",
+      "valor_salvo": 0.05
+    },
+    {
+      "celula": "C36",
+      "rotulo": "ISS — transporte municipal",
+      "valor_salvo": null
+    },
+    {
+      "celula": "C37",
+      "rotulo": "ICMS — transporte intermunicipal e interestadual (alíquota média)",
+      "valor_salvo": null
+    },
+    {
+      "celula": "C38",
+      "rotulo": "Demais tributos sobre a receita (% da receita)",
+      "valor_salvo": null
+    },
+    {
+      "celula": "C53",
+      "rotulo": "CPP no Simples (comércio, armazenagem e transporte)",
+      "valor_salvo": "Dentro do DAS (regra legal)"
+    },
+    {
+      "celula": "C54",
+      "rotulo": "Sublimite estadual",
+      "valor_salvo": 3600000
+    },
+    {
+      "celula": "C55",
+      "rotulo": "Limite do Simples Nacional",
+      "valor_salvo": 4800000
+    },
+    {
+      "celula": "C56",
+      "rotulo": "PJ 2 e PJ 3 — início de atividade",
+      "valor_salvo": "Janeiro de 2027"
+    }
+  ],
+  "Anexo_I": [
+    {
+      "faixa": 1,
+      "limite_inferior": 0,
+      "limite_superior": 180000,
+      "aliquota_nominal": 0.04,
+      "deducao": 0,
+      "IRPJ": 0.055,
+      "CSLL": 0.035,
+      "CBS": 0.1533,
+      "CPP": 0.415,
+      "ICMS": 0.34,
+      "IBS": 0.0017
+    },
+    {
+      "faixa": 2,
+      "limite_inferior": 180000.01,
+      "limite_superior": 360000,
+      "aliquota_nominal": 0.073,
+      "deducao": 5940,
+      "IRPJ": 0.055,
+      "CSLL": 0.035,
+      "CBS": 0.1533,
+      "CPP": 0.415,
+      "ICMS": 0.34,
+      "IBS": 0.0017
+    },
+    {
+      "faixa": 3,
+      "limite_inferior": 360000.01,
+      "limite_superior": 720000,
+      "aliquota_nominal": 0.095,
+      "deducao": 13860,
+      "IRPJ": 0.055,
+      "CSLL": 0.035,
+      "CBS": 0.1533,
+      "CPP": 0.42,
+      "ICMS": 0.335,
+      "IBS": 0.0017
+    },
+    {
+      "faixa": 4,
+      "limite_inferior": 720000.01,
+      "limite_superior": 1800000,
+      "aliquota_nominal": 0.107,
+      "deducao": 22500,
+      "IRPJ": 0.055,
+      "CSLL": 0.035,
+      "CBS": 0.1533,
+      "CPP": 0.42,
+      "ICMS": 0.335,
+      "IBS": 0.0017
+    },
+    {
+      "faixa": 5,
+      "limite_inferior": 1800000.01,
+      "limite_superior": 3600000,
+      "aliquota_nominal": 0.143,
+      "deducao": 87300,
+      "IRPJ": 0.055,
+      "CSLL": 0.035,
+      "CBS": 0.1533,
+      "CPP": 0.42,
+      "ICMS": 0.335,
+      "IBS": 0.0017
+    },
+    {
+      "faixa": 6,
+      "limite_inferior": 3600000.01,
+      "limite_superior": 4800000,
+      "aliquota_nominal": 0.189,
+      "deducao": 378000,
+      "IRPJ": 0.1358,
+      "CSLL": 0.1006,
+      "CBS": 0.3402,
+      "CPP": 0.4234,
+      "ICMS": 0,
+      "IBS": 0
+    }
+  ],
+  "Anexo_III": [
+    {
+      "faixa": 1,
+      "limite_inferior": 0,
+      "limite_superior": 180000,
+      "aliquota_nominal": 0.06,
+      "deducao": 0,
+      "partilha": {
+        "IRPJ": 0.04,
+        "CSLL": 0.035,
+        "CBS": 0.1543,
+        "IBS": 0.0017,
+        "CPP": 0.434,
+        "ISS": 0.335
+      }
+    },
+    {
+      "faixa": 2,
+      "limite_inferior": 180000.01,
+      "limite_superior": 360000,
+      "aliquota_nominal": 0.112,
+      "deducao": 9360,
+      "partilha": {
+        "IRPJ": 0.04,
+        "CSLL": 0.035,
+        "CBS": 0.1691,
+        "IBS": 0.0019,
+        "CPP": 0.434,
+        "ISS": 0.32
+      }
+    },
+    {
+      "faixa": 3,
+      "limite_inferior": 360000.01,
+      "limite_superior": 720000,
+      "aliquota_nominal": 0.135,
+      "deducao": 17640,
+      "partilha": {
+        "IRPJ": 0.04,
+        "CSLL": 0.035,
+        "CBS": 0.1641,
+        "IBS": 0.0019,
+        "CPP": 0.434,
+        "ISS": 0.325
+      }
+    },
+    {
+      "faixa": 4,
+      "limite_inferior": 720000.01,
+      "limite_superior": 1800000,
+      "aliquota_nominal": 0.16,
+      "deducao": 35640,
+      "partilha": {
+        "IRPJ": 0.04,
+        "CSLL": 0.035,
+        "CBS": 0.1641,
+        "IBS": 0.0019,
+        "CPP": 0.434,
+        "ISS": 0.325
+      }
+    },
+    {
+      "faixa": 5,
+      "limite_inferior": 1800000.01,
+      "limite_superior": 3600000,
+      "aliquota_nominal": 0.21,
+      "deducao": 125640,
+      "partilha": {
+        "IRPJ": 0.04,
+        "CSLL": 0.035,
+        "CBS": 0.1543,
+        "IBS": 0.0017,
+        "CPP": 0.434,
+        "ISS": 0.335
+      }
+    },
+    {
+      "faixa": 6,
+      "limite_inferior": 3600000.01,
+      "limite_superior": 4800000,
+      "aliquota_nominal": 0.329,
+      "deducao": 648000,
+      "partilha": {
+        "IRPJ": 0.3509,
+        "CSLL": 0.1504,
+        "CBS": 0.1929,
+        "IBS": 0,
+        "CPP": 0.3058,
+        "ISS": 0
+      }
+    }
+  ],
+  "residual_Anexo_III_ISS_limitado": {
+    "Gatilho - aliquota efetiva superior a": 0.1492537,
+    "ISS maximo em 2027": 0.05,
+    "Residual - IRPJ": 0.0602,
+    "Residual - CSLL": 0.0526,
+    "Residual - CBS": 0.232,
+    "Residual - CPP": 0.6526,
+    "Residual - IBS": 0.0026
+  },
+  "origens": {
+    "Anexo_I": "T6 Simples Nacional!B18:L23",
+    "Anexo_III": "Anexo III 2027!A4:E9 e A13:G18",
+    "parametros": "02. Estrutura e Premissas"
+  }
+}

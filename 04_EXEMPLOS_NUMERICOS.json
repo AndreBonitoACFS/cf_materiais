@@ -1,0 +1,164 @@
+{
+  "natureza": "Exemplos hipotéticos com aritmética verificada separadamente. Não são saídas da planilha nem homologação fiscal.",
+  "casos": [
+    {
+      "id": "LR_1",
+      "descricao": "Lucro Real anual, bases informadas",
+      "entradas": {
+        "base_IRPJ": "-10000.00",
+        "base_CSLL": "-10000.00"
+      },
+      "esperado": {
+        "IRPJ": "0.00",
+        "CSLL": "0.00",
+        "total": "0.00"
+      },
+      "alcance": "IRPJ/CSLL somente; sem compensação de prejuízos e sem outros tributos."
+    },
+    {
+      "id": "LR_2",
+      "descricao": "Lucro Real anual, bases informadas",
+      "entradas": {
+        "base_IRPJ": "200000.00",
+        "base_CSLL": "200000.00"
+      },
+      "esperado": {
+        "IRPJ": "30000.00",
+        "CSLL": "18000.00",
+        "total": "48000.00"
+      },
+      "alcance": "IRPJ/CSLL somente; sem compensação de prejuízos e sem outros tributos."
+    },
+    {
+      "id": "LR_3",
+      "descricao": "Lucro Real anual, bases informadas",
+      "entradas": {
+        "base_IRPJ": "1000000.00",
+        "base_CSLL": "1000000.00"
+      },
+      "esperado": {
+        "IRPJ": "226000.00",
+        "CSLL": "90000.00",
+        "total": "316000.00"
+      },
+      "alcance": "IRPJ/CSLL somente; sem compensação de prejuízos e sem outros tributos."
+    },
+    {
+      "id": "LR_4",
+      "descricao": "Lucro Real anual, bases informadas",
+      "entradas": {
+        "base_IRPJ": "300000.00",
+        "base_CSLL": "250000.00"
+      },
+      "esperado": {
+        "IRPJ": "51000.00",
+        "CSLL": "22500.00",
+        "total": "73500.00"
+      },
+      "alcance": "IRPJ/CSLL somente; sem compensação de prejuízos e sem outros tributos."
+    },
+    {
+      "id": "LP_ARMAZ_1000000",
+      "descricao": "Armazenagem exclusivamente, estimativa anual",
+      "entradas": {
+        "receita_anual": "1000000.00",
+        "presuncao_IRPJ": "0.32",
+        "presuncao_CSLL": "0.32"
+      },
+      "esperado": {
+        "fator_LC224": "1.0",
+        "base_IRPJ": "320000.00",
+        "base_CSLL": "320000.00",
+        "IRPJ": "56000.00",
+        "CSLL": "28800.00",
+        "total": "84800.00"
+      },
+      "alcance": "Somente IRPJ/CSLL no método anual estimado; não inclui ISS/IBS/CBS nem prova apuração fiscal trimestral."
+    },
+    {
+      "id": "LP_ARMAZ_6000000",
+      "descricao": "Armazenagem exclusivamente, estimativa anual",
+      "entradas": {
+        "receita_anual": "6000000.00",
+        "presuncao_IRPJ": "0.32",
+        "presuncao_CSLL": "0.32"
+      },
+      "esperado": {
+        "fator_LC224": "1.016666666666666666666666667",
+        "base_IRPJ": "1952000.00",
+        "base_CSLL": "1952000.00",
+        "IRPJ": "464000.00",
+        "CSLL": "175680.00",
+        "total": "639680.00"
+      },
+      "alcance": "Somente IRPJ/CSLL no método anual estimado; não inclui ISS/IBS/CBS nem prova apuração fiscal trimestral."
+    },
+    {
+      "id": "LOGISTICA_CUSTO",
+      "descricao": "Logística básica",
+      "entradas": {
+        "combustivel_mes": "5000.00",
+        "manutencao_mes": "2000.00",
+        "outros_mes": "1000.00",
+        "depreciacao_ano": "12000.00",
+        "pessoal_ano": "60000.00",
+        "receita_terceiros_mes": "20000.00"
+      },
+      "esperado": {
+        "custo_anual": "168000.00",
+        "receita_terceiros_anual": "240000.00",
+        "margem_antes_tributos": "72000.00"
+      },
+      "alcance": "Sem reconciliação da CF nem tributos. Quantidade/valor de frota não entram nesse custo."
+    },
+    {
+      "id": "SN_INICIO_DAS",
+      "descricao": "Empresa nova, armazenagem, primeira faixa nos meses 1/2",
+      "entradas": {
+        "receita_mes": "100000.00",
+        "regime": "Simples IBS/CBS no DAS",
+        "mes_inicio_2027": 1
+      },
+      "esperado": {
+        "DAS_mes": "6000.00",
+        "parcela_IBS_CBS_da_faixa": "0.1560"
+      },
+      "alcance": "Somente DAS nos meses 1/2, sem impedimento. Regular não inclui nesse número os débitos de IBS/CBS fora do DAS. Não extrapolar a primeira faixa para o ano todo."
+    },
+    {
+      "id": "SN_INICIO_REGULAR",
+      "descricao": "Empresa nova, armazenagem, primeira faixa nos meses 1/2",
+      "entradas": {
+        "receita_mes": "100000.00",
+        "regime": "Simples IBS/CBS regular",
+        "mes_inicio_2027": 1
+      },
+      "esperado": {
+        "DAS_mes": "5064.00",
+        "parcela_IBS_CBS_da_faixa": "0.1560"
+      },
+      "alcance": "Somente DAS nos meses 1/2, sem impedimento. Regular não inclui nesse número os débitos de IBS/CBS fora do DAS. Não extrapolar a primeira faixa para o ano todo."
+    },
+    {
+      "id": "DESPESA_PROPRIA_PJ1",
+      "descricao": "Despesa administrativa própria permanece na empresa responsável",
+      "entradas": {
+        "resultados_antes_dessa_despesa_PJ1_PJ2_PJ3": [
+          "100000.00",
+          "50000.00",
+          "30000.00"
+        ],
+        "despesa_administrativa_PJ1": "12000.00"
+      },
+      "esperado": {
+        "resultados_PJ1_PJ2_PJ3": [
+          "88000.00",
+          "50000.00",
+          "30000.00"
+        ],
+        "resultado_consolidado": "168000.00"
+      },
+      "alcance": "Identidade econômica antes de efeitos fiscais. Despesa exclusiva da PJ1, considerada uma vez; não é distribuída às demais PJs."
+    }
+  ]
+}

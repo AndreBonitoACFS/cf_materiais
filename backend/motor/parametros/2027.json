@@ -1,0 +1,58 @@
+{
+  "versao": "2027.1",
+  "vigencia": {"inicio": "2027-01-01", "fim": "2027-12-31"},
+  "origem": {
+    "referencia": "CF Materiais - Simulacao Tributaria Reorganizacao 2027 - v2.5.2.xlsx",
+    "sha256": "22e1fa3d6f747126aead26cd5df4258e5f1f2bd268ae0d0d970ef30775bcb139",
+    "nota": "Valores extraídos da referência; não constituem homologação jurídica. null é ausência de configuração, não zero."
+  },
+  "parametros": {
+    "ibs": {"valor": "0.001", "fonte": "Referência C15; LC 214/2025", "situacao": "referencia_nao_homologada"},
+    "cbs": {"valor": "0.088", "fonte": "Referência C16; LC 214/2025", "situacao": "provisorio"},
+    "presuncao_irpj_comercio": {"valor": "0.08", "fonte": "Referência C21; Lei 9.249/1995", "situacao": "referencia_nao_homologada"},
+    "presuncao_csll_comercio": {"valor": "0.12", "fonte": "Referência C22; Lei 9.249/1995", "situacao": "referencia_nao_homologada"},
+    "presuncao_irpj_armazenagem": {"valor": "0.32", "fonte": "Referência C23; Lei 9.249/1995", "situacao": "referencia_nao_homologada"},
+    "presuncao_csll_armazenagem": {"valor": "0.32", "fonte": "Referência C24; Lei 9.249/1995", "situacao": "referencia_nao_homologada"},
+    "presuncao_irpj_logistica": {"valor": "0.08", "fonte": "Referência C25; Lei 9.249/1995", "situacao": "referencia_nao_homologada"},
+    "presuncao_csll_logistica": {"valor": "0.12", "fonte": "Referência C26; Lei 9.249/1995", "situacao": "referencia_nao_homologada"},
+    "lc224_limite": {"valor": "5000000", "fonte": "Referência C27; LC 224/2025, art. 4º", "situacao": "referencia_nao_homologada"},
+    "lc224_acrescimo": {"valor": "0.10", "fonte": "Referência C28; LC 224/2025, art. 4º", "situacao": "referencia_nao_homologada"},
+    "irpj_aliquota": {"valor": "0.15", "fonte": "Referência C29; Lei 9.249/1995", "situacao": "referencia_nao_homologada"},
+    "irpj_adicional": {"valor": "0.10", "fonte": "Referência C30; Lei 9.249/1995", "situacao": "referencia_nao_homologada"},
+    "irpj_parcela_isenta_adicional": {"valor": "240000", "fonte": "Referência C31; Lei 9.249/1995", "situacao": "referencia_nao_homologada"},
+    "csll_aliquota": {"valor": "0.09", "fonte": "Referência C32", "situacao": "referencia_nao_homologada"},
+    "pis": {"valor": "0", "fonte": "Referência C33", "situacao": "referencia_nao_homologada"},
+    "cofins": {"valor": "0", "fonte": "Referência C34", "situacao": "referencia_nao_homologada"},
+    "iss_armazenagem": {"valor": "0.05", "fonte": "Referência C35; conferir município/enquadramento", "situacao": "referencia_nao_homologada"},
+    "iss_transporte_municipal": {"valor": null, "fonte": "Referência C36", "situacao": "nao_configurado"},
+    "icms_transporte": {"valor": null, "fonte": "Referência C37", "situacao": "nao_configurado"},
+    "demais_tributos_receita": {"valor": null, "fonte": "Referência C38", "situacao": "nao_configurado"},
+    "simples_sublimite": {"valor": "3600000", "fonte": "Referência C54; LC 123/2006", "situacao": "referencia_nao_homologada"},
+    "simples_limite": {"valor": "4800000", "fonte": "Referência C55; LC 123/2006", "situacao": "referencia_nao_homologada"},
+    "simples_tolerancia_excesso": {"valor": "0.20", "fonte": "LC 123/2006; Resolução CGSN 140/2018", "situacao": "referencia_nao_homologada"},
+    "simples_iss_maximo": {"valor": "0.05", "fonte": "Referência, Anexo III 2027", "situacao": "referencia_nao_homologada"},
+    "simples_iss_gatilho": {"valor": "0.1492537", "fonte": "Referência, Anexo III 2027", "situacao": "referencia_nao_homologada"}
+  },
+  "simples": {
+    "fonte": "Referência: T6 Simples Nacional!B18:L23; Anexo III 2027!A4:E9 e A13:G18",
+    "situacao": "referencia_nao_homologada",
+    "inicio_novas_pjs": "2027-01",
+    "anexo_I": [
+      {"faixa": 1, "superior": "180000", "nominal": "0.04", "deducao": "0", "partilha": {"IRPJ": "0.055", "CSLL": "0.035", "CBS": "0.1533", "CPP": "0.415", "ICMS": "0.34", "IBS": "0.0017"}},
+      {"faixa": 2, "superior": "360000", "nominal": "0.073", "deducao": "5940", "partilha": {"IRPJ": "0.055", "CSLL": "0.035", "CBS": "0.1533", "CPP": "0.415", "ICMS": "0.34", "IBS": "0.0017"}},
+      {"faixa": 3, "superior": "720000", "nominal": "0.095", "deducao": "13860", "partilha": {"IRPJ": "0.055", "CSLL": "0.035", "CBS": "0.1533", "CPP": "0.42", "ICMS": "0.335", "IBS": "0.0017"}},
+      {"faixa": 4, "superior": "1800000", "nominal": "0.107", "deducao": "22500", "partilha": {"IRPJ": "0.055", "CSLL": "0.035", "CBS": "0.1533", "CPP": "0.42", "ICMS": "0.335", "IBS": "0.0017"}},
+      {"faixa": 5, "superior": "3600000", "nominal": "0.143", "deducao": "87300", "partilha": {"IRPJ": "0.055", "CSLL": "0.035", "CBS": "0.1533", "CPP": "0.42", "ICMS": "0.335", "IBS": "0.0017"}},
+      {"faixa": 6, "superior": "4800000", "nominal": "0.189", "deducao": "378000", "partilha": {"IRPJ": "0.1358", "CSLL": "0.1006", "CBS": "0.3402", "CPP": "0.4234", "ICMS": "0", "IBS": "0"}}
+    ],
+    "anexo_III": [
+      {"faixa": 1, "superior": "180000", "nominal": "0.06", "deducao": "0", "partilha": {"IRPJ": "0.04", "CSLL": "0.035", "CBS": "0.1543", "IBS": "0.0017", "CPP": "0.434", "ISS": "0.335"}},
+      {"faixa": 2, "superior": "360000", "nominal": "0.112", "deducao": "9360", "partilha": {"IRPJ": "0.04", "CSLL": "0.035", "CBS": "0.1691", "IBS": "0.0019", "CPP": "0.434", "ISS": "0.32"}},
+      {"faixa": 3, "superior": "720000", "nominal": "0.135", "deducao": "17640", "partilha": {"IRPJ": "0.04", "CSLL": "0.035", "CBS": "0.1641", "IBS": "0.0019", "CPP": "0.434", "ISS": "0.325"}},
+      {"faixa": 4, "superior": "1800000", "nominal": "0.16", "deducao": "35640", "partilha": {"IRPJ": "0.04", "CSLL": "0.035", "CBS": "0.1641", "IBS": "0.0019", "CPP": "0.434", "ISS": "0.325"}},
+      {"faixa": 5, "superior": "3600000", "nominal": "0.21", "deducao": "125640", "partilha": {"IRPJ": "0.04", "CSLL": "0.035", "CBS": "0.1543", "IBS": "0.0017", "CPP": "0.434", "ISS": "0.335"}},
+      {"faixa": 6, "superior": "4800000", "nominal": "0.329", "deducao": "648000", "partilha": {"IRPJ": "0.3509", "CSLL": "0.1504", "CBS": "0.1929", "IBS": "0", "CPP": "0.3058", "ISS": "0"}}
+    ],
+    "residual_anexo_III_iss_limitado": {"IRPJ": "0.0602", "CSLL": "0.0526", "CBS": "0.232", "CPP": "0.6526", "IBS": "0.0026"}
+  }
+}

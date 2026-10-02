@@ -1,0 +1,53 @@
+{
+  "data": "2026-10-01",
+  "escopo": "A/B/C/D, quatro regimes por CNPJ, média mensal. Cost Sharing excluído integralmente.",
+  "referencia_consultada_sha256": "22e1fa3d6f747126aead26cd5df4258e5f1f2bd268ae0d0d970ef30775bcb139",
+  "exemplos_aritmeticos_conferidos": 10,
+  "conteudo": [
+    {
+      "arquivo": "00_LEIA_PRIMEIRO.md",
+      "bytes": 2820,
+      "sha256": "7ce75997f5c27db2ead6fc2500167db81b1b5444642e276aa30ad7405dd8328c"
+    },
+    {
+      "arquivo": "01_ESPECIFICACAO_E_PROMPT.md",
+      "bytes": 9233,
+      "sha256": "9843341844f2a45c3c1ee1d6bbc4326042ec228f994e7ddc87ef24acc4476c28"
+    },
+    {
+      "arquivo": "02_REGRAS_DE_CALCULO.md",
+      "bytes": 12369,
+      "sha256": "77303fc9a6e44c86778783468171b4531114d64782e39b0534723fee33f5afc3"
+    },
+    {
+      "arquivo": "03_INTERFACE_SIMPLIFICADA.md",
+      "bytes": 3134,
+      "sha256": "51b413ee93c4d6ab3c3b04b0c36b9a05f5433403cc17c881cef802a0efa08da5"
+    },
+    {
+      "arquivo": "04_EXEMPLOS_NUMERICOS.json",
+      "bytes": 5470,
+      "sha256": "ead2ccf5715937f4c759b8ea497ebf4c24c54f816368105a2588b47774b44c6c"
+    },
+    {
+      "arquivo": "04_TESTES_E_EXEMPLOS.md",
+      "bytes": 3621,
+      "sha256": "07490ee8fe0e3d16c8a469d6b212d8233f3436d369a3e5d99e487e9764e16aa7"
+    },
+    {
+      "arquivo": "05_FONTES_E_PONTOS_A_DEFINIR.md",
+      "bytes": 4225,
+      "sha256": "b42a4eb9067e0b2e29307f8e09eeb8ff0f2098c76565f40ff02e459c83aec85e"
+    },
+    {
+      "arquivo": "06_REFERENCIA/LEITURA_DA_REFERENCIA.md",
+      "bytes": 797,
+      "sha256": "30efbfd76ac39b9ecc96817b1a67826712e1de1e66b64e09266e2273feb2023e"
+    },
+    {
+      "arquivo": "06_REFERENCIA/PARAMETROS_DA_REFERENCIA.json",
+      "bytes": 7708,
+      "sha256": "8c7ea8cff2acb15bff9e627315eb155e08b69667f0774c724f0755157b3a373d"
+    }
+  ]
+}
