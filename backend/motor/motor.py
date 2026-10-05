@@ -6,6 +6,7 @@ from dataclasses import dataclass, field
 from decimal import Decimal
 
 from . import ibs_cbs
+from .categorias import estimar
 from .decimais import MESES, ZERO, moeda, soma
 from .entradas import Cenario, ConfigPJ, FormaPessoal, TipoAjuste, Transporte
 from .estados import COM_VALORES, Indisponivel, Status, pior
@@ -29,9 +30,10 @@ class _Contexto:
     hipoteses: list = field(default_factory=list)
     provisorio: list = field(default_factory=list)
     pendencias: list = field(default_factory=list)
+    pessoal_calculado: dict = field(default_factory=dict)
 
-    def nota(self, pj, etapa, descricao, formula=None, valor=None):
-        self.memoria.append(LinhaMemoria(pj, etapa, descricao, formula, valor))
+    def nota(self, pj, etapa, descricao, formula=None, valor=None, unidade=None):
+        self.memoria.append(LinhaMemoria(pj, etapa, descricao, formula, valor, unidade or ("moeda" if isinstance(valor, Decimal) else "texto")))
         log.debug("[%s] %s | %s = %s", pj or "consolidado", etapa, descricao, valor)
 
     def hipotese(self, texto):
@@ -84,16 +86,61 @@ def _custo_pessoal(ctx, atividade: Atividade, regime: Regime, faltantes: list, o
         if pessoal.preco_mensal is None:
             faltantes.append(f"Pessoal de {nome}: preço mensal do serviço terceirizado")
             return None
-        return pessoal.preco_mensal * MESES
+        total = pessoal.preco_mensal * MESES
+        ctx.pessoal_calculado[atividade] = {"atividade": atividade.value, "quantidade": None, "folha_anual": None, "encargos_sem_cpp_anual": None, "cpp_anual": None, "custo_anual": total}
+        return total
     no_simples = regime in SIMPLES
+    if atividade is Atividade.COMERCIO and pessoal.custo_total_mensal is not None:
+        if pessoal.remuneracao_mensal is not None:
+            faltantes.append("Pessoal da CF: escolha custo total com encargos ou remuneração, sem preencher ambos")
+            return None
+        return pessoal.custo_total_mensal * MESES
+    remuneracao = pessoal.remuneracao_mensal
+    quantidade = pessoal.quantidade_funcionarios
+    if atividade in SERVICOS and (pessoal.equipe_por_quantidade or quantidade is not None or pessoal.remuneracao_media_mensal is not None):
+        if quantidade is None or quantidade < 0 or quantidade != quantidade.to_integral_value():
+            faltantes.append(f"Pessoal de {nome}: quantidade inteira não negativa de funcionários")
+            return None
+        if quantidade == 0:
+            remuneracao = ZERO
+        elif pessoal.remuneracao_media_mensal is None or pessoal.remuneracao_media_mensal < 0:
+            faltantes.append(f"Pessoal de {nome}: remuneração média mensal por funcionário")
+            return None
+        else:
+            remuneracao = quantidade * pessoal.remuneracao_media_mensal
+    elif atividade in SERVICOS:
+        ctx.hipotese("Entrada legada de folha total: não representa quantidade ou salário individual. Atualize a equipe antes de reutilizar esta configuração.")
     encargos = pessoal.encargos_no_simples if no_simples else pessoal.encargos_fora_do_simples
-    if pessoal.remuneracao_mensal is None:
+    sem_cpp_config = pessoal.encargos_no_simples
+    if pessoal.encargos_componentes:
+        componentes = pessoal.encargos_componentes
+        nomes = ("cpp", "fgts", "ferias", "decimo_terceiro", "beneficios", "outros_encargos")
+        exigidos = [k for k in nomes if k != "cpp" or not no_simples]
+        if remuneracao != ZERO and any(componentes.get(k) is None for k in exigidos):
+            faltantes.append(f"Pessoal de {nome}: componentes de encargos incompletos")
+            return None
+        sem_cpp_config = soma(componentes.get(k) or ZERO for k in nomes if k != "cpp")
+        encargos = sem_cpp_config + (ZERO if no_simples else componentes.get("cpp") or ZERO)
+    if remuneracao is None:
         faltantes.append(f"Pessoal de {nome}: remuneração mensal")
+    if remuneracao == ZERO:
+        encargos = ZERO
     if encargos is None:
         faltantes.append(f"Pessoal de {nome}: encargos aplicáveis {'no Simples (sem CPP patronal)' if no_simples else 'fora do Simples'}")
-    if pessoal.remuneracao_mensal is None or encargos is None:
+    if remuneracao is None or encargos is None:
         return None
-    return pessoal.remuneracao_mensal * MESES * (1 + encargos)
+    sem_cpp = ZERO if remuneracao == ZERO else sem_cpp_config
+    if sem_cpp is None:
+        faltantes.append(f"Pessoal de {nome}: encargos sem CPP")
+        return None
+    if not no_simples and encargos < sem_cpp:
+        faltantes.append(f"Pessoal de {nome}: encargos com CPP inferiores aos encargos sem CPP")
+        return None
+    folha = remuneracao * MESES
+    cpp = ZERO if no_simples else folha * (encargos - sem_cpp)
+    total = folha * (1 + encargos)
+    ctx.pessoal_calculado[atividade] = {"atividade": atividade.value, "quantidade": quantidade, "folha_anual": folha, "encargos_sem_cpp_anual": folha * sem_cpp, "cpp_anual": cpp, "custo_anual": total}
+    return total
 
 
 def _somar_meses(recorrentes) -> list:
@@ -126,6 +173,8 @@ def _operacao(ctx, atividade: Atividade, hospedeira: Empresa, regime: Regime) ->
             faltantes.append("Logística: depreciação anual")
         depreciacao = lg.depreciacao_anual
     pessoal = _custo_pessoal(ctx, atividade, regime, faltantes)
+    if ctx.cenario.config.metodo_credito == "categorias":
+        estimar(ctx, atividade)
     if faltantes:
         raise Indisponivel(Status.DADOS_INCOMPLETOS, faltantes)
     if any(r.uniforme for r in recorrentes):
@@ -189,7 +238,7 @@ def _indiretos(ctx, emp: Empresa, regime: Regime, receitas: dict, *, nova: bool,
             return "ISS", p.obter("iss_transporte_municipal")
         return "ICMS", p.obter("icms_transporte")
 
-    fora = {"ISS": list(_ZEROS), "ICMS": list(_ZEROS), "IBS": list(_ZEROS)}
+    fora = {"ISS": list(_ZEROS), "ICMS": list(_ZEROS), "IBS": list(_ZEROS), "Outros": list(_ZEROS)}
     apuracao = None
     if regime in SIMPLES:
         if transporte is Transporte.INTERMUNICIPAL:
@@ -229,6 +278,8 @@ def _indiretos(ctx, emp: Empresa, regime: Regime, receitas: dict, *, nova: bool,
         ctx.hipotese("Débito de IBS/CBS calculado pela alíquota sobre a receita informada (sem extração de tributo embutido no preço).")
     if p.valores["demais_tributos_receita"] is None:
         ctx.hipotese("Demais tributos sobre a receita não configurados: nenhum valor aplicado (ausência de configuração, não zero).")
+    else:
+        fora["Outros"] = [moeda(soma(s[m] for s in servicos.values()) * p.obter("demais_tributos_receita")) for m in range(MESES)]
     for tributo, serie in fora.items():
         if any(serie):
             ctx.nota(emp.id, "Tributos fora do DAS", f"{tributo} anual", "Σ base_tributável × alíquota_aplicável", soma(serie))
@@ -240,6 +291,11 @@ def _credito_transferivel(ctx, regime: Regime, ind: _Indiretos, op: _Operacao) -
     if not any(op.receita_cf):
         return list(_ZEROS), list(_ZEROS)
     if regime in REGULARES:
+        elegivel = ctx.cenario.config.credito_regular_por_atividade.get(op.atividade.value)
+        if elegivel is not True:
+            if elegivel is None:
+                ctx.provisoria(f"Crédito de serviços de {op.atividade.value}: elegibilidade pendente, não liberado.")
+            return list(_ZEROS), list(_ZEROS)
         return (
             [ibs_cbs.debito(r, ctx.p.obter("ibs")) for r in op.receita_cf],
             [ibs_cbs.debito(r, ctx.p.obter("cbs")) for r in op.receita_cf],
@@ -268,7 +324,7 @@ def _tributos_base(ind: _Indiretos) -> dict:
     tributos = {}
     if ind.simples is not None:
         tributos["DAS"] = ind.simples.das_anual
-    for nome in ("ISS", "ICMS"):
+    for nome in ("ISS", "ICMS", "Outros"):
         if any(ind.fora_do_das[nome]):
             tributos[nome] = soma(ind.fora_do_das[nome])
     return tributos
@@ -291,13 +347,13 @@ def _mensal_simples(ind: _Indiretos) -> list:
     ]
 
 
-def _irpj_csll(ctx, emp, regime, receitas_anuais: dict, antes: Decimal, adicao_entre_pjs: Decimal = ZERO) -> dict:
+def _irpj_csll(ctx, emp, regime, receitas_anuais: dict, antes: Decimal, adicao_entre_pjs: Decimal = ZERO, receita_bruta=None) -> dict:
     """IRPJ/CSLL fora do DAS. Presunção só no Lucro Presumido."""
     if regime in SIMPLES:
         return {}
     if regime is Regime.LUCRO_PRESUMIDO:
-        r = lucro_presumido(receitas_anuais, _presuncoes(ctx.p), ctx.p)
-        ctx.nota(emp.id, "Lucro Presumido", "Fator LC 224/2025", "1 + 0,10 × max(0, R − 5.000.000) / R", str(r.fator_lc224))
+        r = lucro_presumido(receitas_anuais, _presuncoes(ctx.p), ctx.p, receita_bruta)
+        ctx.nota(emp.id, "Lucro Presumido", "Fator LC 224/2025", "1 + 0,10 × max(0, R − 5.000.000) / R", str(r.fator_lc224), unidade="fator")
         ctx.nota(emp.id, "Lucro Presumido", "Base presumida do IRPJ", "Σ(receita × presunção_IRPJ) × fator", r.base_irpj)
         ctx.nota(emp.id, "Lucro Presumido", "Base presumida da CSLL", "Σ(receita × presunção_CSLL) × fator", r.base_csll)
         ctx.hipotese("Lucro Presumido: estimativa anual por CNPJ, não apuração fiscal por período; LC 224/2025 aplicada pela expressão anual.")
@@ -315,9 +371,21 @@ def _irpj_csll(ctx, emp, regime, receitas_anuais: dict, antes: Decimal, adicao_e
 
 def _creditos_informados(ctx, emp) -> tuple:
     cfg = ctx.config_pj(emp)
+    adicionais = {"IBS": cfg.credito_adicional_ibs_mensal or ZERO, "CBS": cfg.credito_adicional_cbs_mensal or ZERO}
+    if ctx.cenario.config.metodo_credito == "categorias":
+        totais = dict(adicionais)
+        for a in emp.atividades:
+            if a is Atividade.COMERCIO:
+                continue  # substituição da base tratada no cálculo incremental
+            valores = estimar(ctx, a)
+            for nome in totais:
+                totais[nome] += valores[nome]
+        ctx.provisoria("Créditos por categorias: estimativa sujeita à conferência de composição, estoque e base de aquisição.")
+        return [totais["IBS"]] * MESES, [totais["CBS"]] * MESES
+    cfg = ctx.config_pj(emp)
     if cfg.credito_ibs_mensal is None and cfg.credito_cbs_mensal is None:
         ctx.hipotese("Créditos de IBS/CBS sobre aquisições de terceiros não informados pela contabilidade: nenhum crédito presumido sobre custos.")
-    return [cfg.credito_ibs_mensal or ZERO] * MESES, [cfg.credito_cbs_mensal or ZERO] * MESES
+    return [(cfg.credito_ibs_mensal or ZERO) + adicionais["IBS"]] * MESES, [(cfg.credito_cbs_mensal or ZERO) + adicionais["CBS"]] * MESES
 
 
 def _novo_resultado(emp: Empresa, regime) -> ResultadoPJ:
@@ -338,6 +406,7 @@ def _prestadora(ctx, emp: Empresa, regime: Regime, ops: dict, indiretos: dict) -
         if regime in REGULARES:
             creditos = dict(zip(("IBS", "CBS"), _creditos_informados(ctx, emp)))
             for nome, debitos in (("IBS", ind.debito_ibs), ("CBS", ind.debito_cbs)):
+                r.creditos_potenciais[nome] = soma(creditos[nome])
                 meses = ibs_cbs.apurar(debitos, creditos[nome])
                 tributos[nome] = soma(m.a_recolher for m in meses)
                 r.creditos_utilizados[nome] = soma(m.utilizado for m in meses)
@@ -346,10 +415,20 @@ def _prestadora(ctx, emp: Empresa, regime: Regime, ops: dict, indiretos: dict) -
             if any(ind.debito_cbs):
                 ctx.provisoria("CBS regular de 2027 é parâmetro provisório da referência.")
         elif any(ind.fora_do_das["IBS"]):
-            tributos["IBS"] = soma(ind.fora_do_das["IBS"])
+            creditos_ibs = _creditos_informados(ctx, emp)[0]
+            creditos_ibs = [c if m.impedido else ZERO for c, m in zip(creditos_ibs, ind.simples.meses)]
+            apuracao_ibs = ibs_cbs.apurar(ind.fora_do_das["IBS"], creditos_ibs)
+            tributos["IBS"] = soma(m.a_recolher for m in apuracao_ibs)
+            r.creditos_potenciais["IBS"] = soma(creditos_ibs)
+            r.creditos_utilizados["IBS"] = soma(m.utilizado for m in apuracao_ibs)
+            r.saldo_credor_final["IBS"] = apuracao_ibs[-1].saldo_final
 
         r.receita = moeda(soma(soma(s) for s in receitas.values()))
         r.receita_entre_pjs = moeda(soma(soma(o.receita_cf) for o in minhas))
+        if ctx.cenario.config.preco_entre_pjs_com_tributo_acrescido and regime in REGULARES:
+            r.receita += soma(ind.debito_ibs) + soma(ind.debito_cbs)
+            r.receita_entre_pjs += soma(soma(ibs_cbs.debito(v, ctx.p.obter("ibs")) + ibs_cbs.debito(v, ctx.p.obter("cbs")) for v in o.receita_cf) for o in minhas)
+            ctx.hipotese("Serviços regulares com tributos acrescidos: preços-base para CF e terceiros; receita econômica bruta inclui IBS/CBS, bases de ISS/IRPJ/CSLL conservam o preço-base.")
         r.custos = moeda(soma(o.custo_anual for o in minhas))
         r.despesas_entre_pjs = ZERO
         r.resultado_antes_irpj_csll = r.receita - r.custos - soma(tributos.values())
@@ -392,29 +471,37 @@ def _base_da_cf(ctx, regime: Regime):
     return base
 
 
-def _ibs_cbs_incremental(ctx, emp, base, novos_debitos: dict, novos_creditos: dict, r: ResultadoPJ) -> dict:
+def _ibs_cbs_incremental(ctx, emp, base, novos_debitos: dict, novos_creditos: dict, r: ResultadoPJ, impostos=("IBS", "CBS"), meses_ativos=None) -> dict:
     """Na CF os créditos compensam também o débito do comércio já embutido na
     base; registra-se apenas o efeito incremental sobre o valor a recolher."""
-    if not any(any(s) for s in (*novos_debitos.values(), *novos_creditos.values())):
+    categorias = ctx.cenario.config.metodo_credito == "categorias"
+    if not categorias and not any(any(s) for s in (*novos_debitos.values(), *novos_creditos.values())):
         return {}
     embutidos = {
         "IBS": (base.debito_ibs_mensal, base.credito_ibs_mensal),
         "CBS": (base.debito_cbs_mensal, base.credito_cbs_mensal),
     }
+    embutidos = {n: embutidos[n] for n in impostos}
+    meses_ativos = [True] * MESES if meses_ativos is None else meses_ativos
     if any(v is None for par in embutidos.values() for v in par):
         raise Indisponivel(
             Status.DADOS_INCOMPLETOS,
             ["Base da CF: débitos e créditos mensais de IBS/CBS do comércio embutidos na base (necessários para o efeito incremental)."],
         )
     efeitos = {}
+    estimados = estimar(ctx, Atividade.COMERCIO) if categorias else {}
     for nome, (debito, credito) in embutidos.items():
-        antes = ibs_cbs.apurar([debito] * MESES, [credito] * MESES)
-        depois = ibs_cbs.apurar([debito + d for d in novos_debitos[nome]], [credito + c for c in novos_creditos[nome]])
+        antes = ibs_cbs.apurar([debito if ativo else ZERO for ativo in meses_ativos], [credito if ativo else ZERO for ativo in meses_ativos])
+        novo = estimados[nome] if categorias else credito
+        depois = ibs_cbs.apurar([(debito + d) if ativo else ZERO for d, ativo in zip(novos_debitos[nome], meses_ativos)], [(novo + c) if ativo else ZERO for c, ativo in zip(novos_creditos[nome], meses_ativos)])
         efeitos[nome] = soma(m.a_recolher for m in depois) - soma(m.a_recolher for m in antes)
         r.creditos_utilizados[nome] = soma(m.utilizado for m in depois) - soma(m.utilizado for m in antes)
+        r.creditos_utilizados_totais[nome] = soma(m.utilizado for m in depois)
+        r.creditos_potenciais[nome] = soma((novo + c) if ativo else ZERO for c, ativo in zip(novos_creditos[nome], meses_ativos))
         r.saldo_credor_final[nome] = depois[-1].saldo_final
         ctx.nota(emp.id, "IBS/CBS regular", f"{nome}: efeito incremental a recolher", "a_recolher com serviços e créditos novos − a_recolher da base", efeitos[nome])
-    ctx.provisoria("CBS regular de 2027 é parâmetro provisório da referência.")
+    if "CBS" in impostos:
+        ctx.provisoria("CBS regular de 2027 é parâmetro provisório da referência.")
     ctx.hipotese("IBS/CBS da CF: débito do comércio distribuído pela média mensal da base; não equivale à escrituração mensal.")
     return efeitos
 
@@ -423,6 +510,9 @@ def _cf(ctx, emp: Empresa, regime: Regime, ops: dict, hospedeiras: dict, resulta
     r = _novo_resultado(emp, regime)
     try:
         base = _base_da_cf(ctx, regime)
+        if regime in SIMPLES:
+            # A elegibilidade conhecida não depende de preencher a equipe de outra PJ.
+            apurar_simples({Atividade.COMERCIO: base.receita_comercio.mensal()}, nova=False, regular=regime is Regime.SIMPLES_REGULAR, historico=base.historico_receita, p=ctx.p)
         internas = [_exigir_op(ops[a]) for a in emp.atividades if a is not Atividade.COMERCIO]
         externas = []
         for atividade in SERVICOS:
@@ -470,15 +560,22 @@ def _cf(ctx, emp: Empresa, regime: Regime, ops: dict, hospedeiras: dict, resulta
         for op in internas:
             nome = NOMES_ATIVIDADE[op.atividade]
             ponte.append((f"Receita nova: {nome} para terceiros", soma(op.receita_terceiros)))
+            if ctx.cenario.config.preco_entre_pjs_com_tributo_acrescido and regime in REGULARES:
+                acrescido = soma(ibs_cbs.debito(v, ctx.p.obter("ibs")) + ibs_cbs.debito(v, ctx.p.obter("cbs")) for v in op.receita_terceiros)
+                ponte.append((f"IBS/CBS acrescidos aos serviços de {nome} para terceiros", acrescido))
             ponte.append((f"Custo novo: {nome} (atividade na própria CF)", -op.custo_anual))
         despesas_entre_pjs = ZERO
         creditos = {"IBS": list(_ZEROS), "CBS": list(_ZEROS)}
         for op in externas:
             fornecedora, regime_fornecedora = hospedeiras[op.atividade]
             aquisicao = soma(op.receita_cf)
+            if ctx.cenario.config.preco_entre_pjs_com_tributo_acrescido and regime_fornecedora in REGULARES:
+                acrescido = soma(ibs_cbs.debito(v, ctx.p.obter("ibs")) + ibs_cbs.debito(v, ctx.p.obter("cbs")) for v in op.receita_cf)
+                aquisicao += acrescido
+                ctx.nota(emp.id, "Serviços entre PJs", "IBS/CBS acrescidos ao preço-base", "preço-base × (IBS + CBS)", acrescido)
             despesas_entre_pjs += aquisicao
             ponte.append((f"Custo novo: {NOMES_ATIVIDADE[op.atividade]} adquirida de {fornecedora.id.upper()}", -aquisicao))
-            if regime in REGULARES:
+            if regime in REGULARES or (ctx.cenario.config.metodo_credito == "categorias" and ind.simples and any(m.impedido for m in ind.simples.meses)):
                 ibs, cbs = _credito_transferivel(ctx, regime_fornecedora, indiretos[fornecedora.id], op)
                 creditos["IBS"] = [a + b for a, b in zip(creditos["IBS"], ibs)]
                 creditos["CBS"] = [a + b for a, b in zip(creditos["CBS"], cbs)]
@@ -489,6 +586,10 @@ def _cf(ctx, emp: Empresa, regime: Regime, ops: dict, hospedeiras: dict, resulta
             creditos["IBS"] = [a + b for a, b in zip(creditos["IBS"], informados[0])]
             creditos["CBS"] = [a + b for a, b in zip(creditos["CBS"], informados[1])]
             tributos.update(_ibs_cbs_incremental(ctx, emp, base, {"IBS": ind.debito_ibs, "CBS": ind.debito_cbs}, creditos, r))
+        elif ctx.cenario.config.metodo_credito == "categorias" and ind.simples and any(m.impedido for m in ind.simples.meses):
+            informados = _creditos_informados(ctx, emp)
+            creditos["IBS"] = [a + b for a, b in zip(creditos["IBS"], informados[0])]
+            tributos.update(_ibs_cbs_incremental(ctx, emp, base, {"IBS": ind.fora_do_das["IBS"]}, creditos, r, impostos=("IBS",), meses_ativos=[m.impedido for m in ind.simples.meses]))
         elif any(ind.fora_do_das["IBS"]):
             tributos["IBS"] = soma(ind.fora_do_das["IBS"])
         elif despesas_entre_pjs:
@@ -502,7 +603,10 @@ def _cf(ctx, emp: Empresa, regime: Regime, ops: dict, hospedeiras: dict, resulta
             adicao = despesas_entre_pjs
             ctx.hipotese("Lucro Real da CF: despesas com outras PJs adicionadas à base por dedutibilidade não confirmada (premissa conservadora).")
         receitas_anuais = {a: soma(s) for a, s in receitas.items()}
-        sobre_lucro = _irpj_csll(ctx, emp, regime, receitas_anuais, antes, adicao)
+        receitas_tributaveis = dict(receitas_anuais)
+        if base.receita_sujeita_presuncao.informado:
+            receitas_tributaveis[Atividade.COMERCIO] = base.receita_sujeita_presuncao.anual()
+        sobre_lucro = _irpj_csll(ctx, emp, regime, receitas_tributaveis, antes, adicao, soma(receitas_anuais.values()))
         tributos.update(sobre_lucro)
 
         if base.reconciliacao_confirmada is not True:
@@ -514,6 +618,8 @@ def _cf(ctx, emp: Empresa, regime: Regime, ops: dict, hospedeiras: dict, resulta
 
         r.ponte = [{"descricao": d, "valor": moeda(v)} for d, v in ponte]
         r.receita = moeda(soma(receitas_anuais.values()))
+        if ctx.cenario.config.preco_entre_pjs_com_tributo_acrescido and regime in REGULARES:
+            r.receita += soma(ind.debito_ibs) + soma(ind.debito_cbs)
         r.receita_entre_pjs = ZERO
         r.despesas_entre_pjs = moeda(despesas_entre_pjs)
         r.tributos = tributos
@@ -560,9 +666,11 @@ def _consolidar(ctx, resultados: list) -> Consolidado:
 def simular(cenario: Cenario, parametros: Parametros | None = None) -> Resultado:
     cfg = cenario.config
     p = (parametros or carregar(2027)).com_valores(
-        iss_transporte_municipal=cfg.iss_transporte_municipal, icms_transporte=cfg.icms_transporte
+        iss_transporte_municipal=cfg.iss_transporte_municipal, icms_transporte=cfg.icms_transporte, demais_tributos_receita=cfg.demais_tributos_receita
     )
     ctx = _Contexto(cenario, p)
+    for validacao in cfg.validacoes_pendentes:
+        ctx.provisoria(validacao)
     log.info(
         "Simulação: estrutura=%s regimes=%s",
         cenario.estrutura and cenario.estrutura.value,
@@ -602,6 +710,8 @@ def simular(cenario: Cenario, parametros: Parametros | None = None) -> Resultado
 
     lista = [resultados[e.id] for e in ativas]
     for r in lista:
+        r.pessoal = [v for a, v in ctx.pessoal_calculado.items() if a in next(e.atividades for e in ativas if e.id == r.id)]
+        r.pessoal_totais = {k: soma(p.get(k) or ZERO for p in r.pessoal) for k in ("quantidade", "folha_anual", "encargos_sem_cpp_anual", "cpp_anual", "custo_anual")}
         if r.status in COM_VALORES and ctx.provisorio:
             r.status = Status.SIMULACAO_PROVISORIA
         ctx.pendencias += [Pendencia(m, r.id) for m in r.motivos]

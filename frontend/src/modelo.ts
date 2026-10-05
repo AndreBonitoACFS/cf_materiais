@@ -22,6 +22,11 @@ export interface Base {
 }
 
 export interface Formulario {
+  perfil?: { id: string; origem: string; ano: number; data: string; aviso: string; pendencias?: string[] };
+  metodoCredito?: "manter_projecao" | "categorias";
+  categorias?: Partial<Record<Atividade, Record<string, Texto>>>;
+  creditoRegular?: Partial<Record<Atividade, SimNao>>;
+  tributoAcrescido?: boolean;
   estrutura: Estrutura | "";
   regimes: Record<string, Regime | "">;
   galpoes: Texto[];
@@ -86,11 +91,36 @@ export const formularioVazio = (): Formulario => ({
   porPapel: {},
 });
 
-/** Converte "1.234,56" ou "1234.56" em texto decimal; "" vira null. */
+export function comecarEmBranco(atual: Formulario): Formulario {
+  const f = formularioVazio();
+  f.config = { ...atual.config, resultado_referencia_anual: "" };
+  for (const a of ["comercio", "armazenagem", "logistica"] as Atividade[]) {
+    for (const k of ["encargos_detalhados", "encargos_no_simples", "encargos_fora_do_simples", "cpp", "fgts", "ferias", "decimo_terceiro", "beneficios", "outros_encargos"]) {
+      if (atual.pessoal[a][k] !== undefined) f.pessoal[a][k] = atual.pessoal[a][k];
+    }
+  }
+  return f;
+}
+
+/** Padrão brasileiro: ponto agrupa milhares; vírgula separa centavos. */
 export function numero(texto: string | undefined): string | null {
   const t = (texto ?? "").trim().replace(/\s|R\$/g, "");
   if (t === "") return null;
-  return t.includes(",") ? t.replace(/\./g, "").replace(",", ".") : t;
+  if (!/^-?(?:\d+|\d{1,3}(?:\.\d{3})+)(?:,\d+)?$/.test(t)) {
+    throw new Error("Informe um número no padrão brasileiro, como 25.000,50. Use vírgula para decimais.");
+  }
+  return t.replace(/\./g, "").replace(",", ".");
+}
+
+export function erroNumero(texto: string | undefined, unidade: string, permiteNegativo = false): string {
+  try {
+    const n = numero(texto);
+    if (n === null) return "";
+    if (!permiteNegativo && Number(n) < 0) return "Informe zero ou um valor positivo. O valor não pode ser negativo.";
+    if (unidade === "%" && Number(n) > 100) return "Informe um percentual entre 0 e 100.";
+    if ((unidade === "veículos" || unidade === "pessoas") && !Number.isInteger(Number(n))) return "Informe uma quantidade inteira.";
+    return "";
+  } catch (e) { return (e as Error).message; }
 }
 
 /** Percentual digitado ("35,5") em fração decimal exata ("0.355"), sem ponto flutuante. */
@@ -112,12 +142,21 @@ export function paraApi(f: Formulario) {
   const pessoal = (a: Atividade) => {
     const p = f.pessoal[a];
     if (!p.forma) return null;
+    const quantidade = p.forma === "direta" && a !== "comercio" ? numero(p.quantidade_funcionarios) : null;
+    const zeroEquipe = quantidade !== null && Number(quantidade) === 0;
+    const usaEncargos = p.forma === "direta" && !zeroEquipe && !(a === "comercio" && p.custo_total_mensal);
+    const simples = eSimples(f.regimes[ativas.find(e => e.atividades.includes(a))?.id ?? ""] ?? "");
     return {
       forma: p.forma,
-      remuneracao_mensal: numero(p.remuneracao_mensal),
-      encargos_no_simples: percentual(p.encargos_no_simples),
-      encargos_fora_do_simples: percentual(p.encargos_fora_do_simples),
-      preco_mensal: numero(p.preco_mensal),
+      encargos_componentes: usaEncargos && p.encargos_detalhados === "sim" ? Object.fromEntries(["cpp", "fgts", "ferias", "decimo_terceiro", "beneficios", "outros_encargos"].map(k => [k, k === "cpp" && simples ? null : percentual(p[k])])) : {},
+      equipe_por_quantidade: a !== "comercio",
+      quantidade_funcionarios: quantidade,
+      remuneracao_media_mensal: p.forma === "direta" && a !== "comercio" && !zeroEquipe ? numero(p.remuneracao_media_mensal) : null,
+      remuneracao_mensal: p.forma === "direta" && a === "comercio" && !p.custo_total_mensal ? numero(p.remuneracao_mensal) : null,
+      custo_total_mensal: p.forma === "direta" && a === "comercio" ? numero(p.custo_total_mensal) : null,
+      encargos_no_simples: usaEncargos && p.encargos_detalhados !== "sim" ? percentual(p.encargos_no_simples) : null,
+      encargos_fora_do_simples: usaEncargos && !simples && p.encargos_detalhados !== "sim" ? percentual(p.encargos_fora_do_simples) : null,
+      preco_mensal: p.forma === "terceirizacao" ? numero(p.preco_mensal) : null,
     };
   };
   const historico = (base?.historico ?? "").split(/[;\n]+/).map((v) => numero(v)).filter((v) => v !== null);
@@ -131,13 +170,19 @@ export function paraApi(f: Formulario) {
     },
     pessoal: { comercio: pessoal("comercio"), armazenagem: pessoal("armazenagem"), logistica: pessoal("logistica") },
     config: {
+      demais_tributos_receita: percentual(f.config.demais_tributos_receita),
+      validacoes_pendentes: f.perfil?.pendencias ?? [],
+      metodo_credito: f.metodoCredito ?? "manter_projecao",
+      categorias: f.metodoCredito === "categorias" ? Object.fromEntries(Object.entries(f.categorias ?? {}).map(([a, cats]) => [a, Object.fromEntries(Object.entries(cats).map(([nome, c]) => [nome, { custo_bruto_mensal: numero(c.custo_bruto_mensal), percentual_elegivel: percentual(c.percentual_elegivel) }]))])) : {},
+      credito_regular_por_atividade: Object.fromEntries((["armazenagem", "logistica"] as Atividade[]).map(a => [a, simNao(f.creditoRegular?.[a] ?? "")])),
+      preco_entre_pjs_com_tributo_acrescido: f.tributoAcrescido ?? false,
       bases_cf:
         base && regimeCf
           ? [
               {
                 regime: regimeCf,
                 ...nums(base.campos, [
-                  "receita_comercio", "resultado_antes_irpj_csll_anual", "das_embutido_anual", "debito_ibs_mensal",
+                  "receita_comercio", "receita_sujeita_presuncao", "resultado_antes_irpj_csll_anual", "das_embutido_anual", "debito_ibs_mensal",
                   "credito_ibs_mensal", "debito_cbs_mensal", "credito_cbs_mensal", "custo_pessoal_embutido_anual",
                 ]),
                 historico_receita: historico.length ? historico : null,
@@ -155,7 +200,7 @@ export function paraApi(f: Formulario) {
       por_papel: Object.fromEntries(
         ativas.map((e) => [
           e.papel,
-          nums(f.porPapel[e.papel] ?? {}, ["adicoes_irpj", "exclusoes_irpj", "adicoes_csll", "exclusoes_csll", "credito_ibs_mensal", "credito_cbs_mensal"]),
+          nums(f.porPapel[e.papel] ?? {}, ["adicoes_irpj", "exclusoes_irpj", "adicoes_csll", "exclusoes_csll", "credito_ibs_mensal", "credito_cbs_mensal", "credito_adicional_ibs_mensal", "credito_adicional_cbs_mensal"]),
         ]),
       ),
     },
@@ -179,6 +224,10 @@ export interface ResultadoPJ {
   total_tributos: string | null;
   creditos_utilizados: Record<string, string>;
   saldo_credor_final: Record<string, string>;
+  creditos_potenciais: Record<string, string>;
+  creditos_utilizados_totais: Record<string, string>;
+  pessoal: { atividade: string; quantidade: string | null; folha_anual: string; encargos_sem_cpp_anual: string; cpp_anual: string; custo_anual: string }[];
+  pessoal_totais: Record<string, string>;
   resultado: string | null;
   ponte: { descricao: string; valor: string }[];
   apuracao_mensal: { mes: number; receita: string; rbt12: string | null; faixa: number; impedido_sublimite: boolean; das: string }[];
@@ -199,7 +248,7 @@ export interface Resultado {
   };
   pendencias: { mensagem: string; pj: string | null; bloqueante: boolean }[];
   hipoteses: string[];
-  memoria: { pj: string | null; etapa: string; descricao: string; formula: string | null; valor: string | null }[];
+  memoria: { pj: string | null; etapa: string; descricao: string; formula: string | null; valor: string | null; unidade: "moeda" | "fator" | "texto" }[];
   parametros: { versao: string; vigencia: { inicio: string; fim: string } };
 }
 
@@ -210,29 +259,18 @@ export interface Diferenca {
 }
 
 async function post<T>(caminho: string, corpo: unknown): Promise<T> {
-  console.log(`[api] POST ${caminho} — enviado`, corpo);
   let resposta: Response;
   try {
     resposta = await fetch(caminho, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(corpo) });
-  } catch (e) {
-    console.error(`[api] POST ${caminho} — sem resposta (a API está rodando na porta 8010?)`, e);
-    throw e;
+  } catch {
+    throw new Error("Não foi possível conectar ao simulador. Tente novamente em instantes.");
   }
   if (!resposta.ok) {
-    const erro = await resposta.json().catch(() => null);
-    console.error(`[api] POST ${caminho} — erro ${resposta.status}`, erro);
-    const detalhe = erro?.detail;
-    const texto = Array.isArray(detalhe)
-      ? detalhe.map((d: { loc: string[]; msg: string }) => `${d.loc.slice(1).join(" › ")}: ${d.msg}`).join("\n")
-      : (detalhe ??
-        // O proxy do Vite responde 5xx sem corpo quando não consegue conectar à API.
-        (erro === null && resposta.status >= 500
-          ? `Erro ${resposta.status} sem detalhe: a API não respondeu. Confira se ela está rodando na porta 8010 e veja o terminal do uvicorn.`
-          : `Erro ${resposta.status}`));
-    throw new Error(texto);
+    throw new Error(resposta.status === 422
+      ? "Confira os dados informados: valores, percentuais, histórico de receita e identificadores únicos dos ajustes."
+      : "Não foi possível concluir o cálculo. Tente novamente em instantes.");
   }
   const dados = await resposta.json();
-  console.log(`[api] POST ${caminho} — recebido`, dados);
   return dados;
 }
 

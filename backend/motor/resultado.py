@@ -13,6 +13,7 @@ class LinhaMemoria:
     descricao: str
     formula: str | None = None
     valor: Decimal | str | None = None
+    unidade: str = "texto"
 
 
 @dataclass
@@ -39,6 +40,10 @@ class ResultadoPJ:
     total_tributos: Decimal | None = None
     creditos_utilizados: dict = field(default_factory=dict)
     saldo_credor_final: dict = field(default_factory=dict)
+    creditos_potenciais: dict = field(default_factory=dict)
+    creditos_utilizados_totais: dict = field(default_factory=dict)
+    pessoal: list = field(default_factory=list)
+    pessoal_totais: dict = field(default_factory=dict)
     resultado_antes_irpj_csll: Decimal | None = None
     resultado: Decimal | None = None
     ponte: list = field(default_factory=list)  # somente CF

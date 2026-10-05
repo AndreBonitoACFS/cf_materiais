@@ -19,7 +19,7 @@ const pjNome = (id: string) => id.toUpperCase().replace("PJ", "PJ ");
 const temValores = (status: string) => status === "calculo_disponivel" || status === "simulacao_provisoria";
 
 function Empresa({ e }: { e: ResultadoPJ }) {
-  const creditos = Object.entries(e.creditos_utilizados);
+  const creditos = Object.entries(Object.keys(e.creditos_utilizados_totais ?? {}).length ? e.creditos_utilizados_totais : e.creditos_utilizados);
   return (
     <div className="rounded-lg border border-slate-200 p-3">
       <div className="flex items-start justify-between gap-2">
@@ -42,6 +42,24 @@ function Empresa({ e }: { e: ResultadoPJ }) {
           {creditos.map(([nome, valor]) => (
             <Linha key={nome} rotulo={`Crédito de ${nome} utilizado`} valor={valor} recuo />
           ))}
+          {Object.entries(e.creditos_potenciais ?? {}).map(([nome, valor]) => <Linha key={`pot-${nome}`} rotulo={`Crédito de ${nome} potencial`} valor={valor} recuo />)}
+          {Object.entries(e.saldo_credor_final).map(([nome, valor]) => <Linha key={`saldo-${nome}`} rotulo={`Saldo credor de ${nome} (sem caixa automático)`} valor={valor} recuo />)}
+          {(e.pessoal ?? []).map(p => <div key={p.atividade} className="my-3 border-t pt-2">
+            <p className="text-sm font-medium">Pessoal — {p.atividade} · {p.quantidade ?? "Terceirização: empregados próprios não se aplicam"}{p.quantidade !== null ? " pessoas" : ""}</p>
+            {p.folha_anual !== null && <>
+            <Linha rotulo="Folha anual" valor={p.folha_anual} />
+            <Linha rotulo="Encargos sem CPP" valor={p.encargos_sem_cpp_anual} />
+            <Linha rotulo="CPP adicional" valor={p.cpp_anual} />
+            </>}
+            <Linha rotulo="Custo anual de pessoal" valor={p.custo_anual} />
+          </div>)}
+          {(e.pessoal?.length ?? 0) > 0 && <div className="my-3 border-t pt-2">
+            <p className="text-sm font-medium">Total desta PJ: {e.pessoal_totais?.quantidade ?? "0"} empregados próprios projetados</p>
+            <Linha rotulo="Folha total anual" valor={e.pessoal_totais?.folha_anual} />
+            <Linha rotulo="Encargos totais sem CPP" valor={e.pessoal_totais?.encargos_sem_cpp_anual} />
+            <Linha rotulo="CPP total adicional" valor={e.pessoal_totais?.cpp_anual} />
+            <Linha rotulo="Pessoal direto e terceirizado — total anual" valor={e.pessoal_totais?.custo_anual} />
+          </div>}
           <Linha rotulo="Resultado" valor={e.resultado} forte />
         </div>
       ) : (
@@ -132,7 +150,7 @@ export function Resultados({ resultado, titulo }: { resultado: Resultado; titulo
                     <td className="py-1 pr-3">{l.descricao}</td>
                     <td className="py-1 pr-3 font-mono text-xs text-slate-600">{l.formula}</td>
                     <td className="py-1 text-right tabular-nums whitespace-nowrap">
-                      {l.valor === null ? "" : /^-?\d+\.\d{2}$/.test(l.valor) ? moeda(l.valor) : l.valor}
+                      {l.valor === null ? "" : l.unidade === "moeda" ? moeda(l.valor) : l.valor}
                     </td>
                   </tr>
                 ))}

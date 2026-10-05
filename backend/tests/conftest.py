@@ -28,7 +28,7 @@ def base_cf(regime, **extra):
 def dados(estrutura="D", regimes=None, **alteracoes):
     """Cenário completo e hipotético; valores em média mensal."""
     ids = ("pj1", "pj2", "pj3") if estrutura == "D" else ("pj1", "pj2")
-    pessoal = {"forma": "direta", "remuneracao_mensal": 10000, "encargos_no_simples": "0.35", "encargos_fora_do_simples": "0.60"}
+    pessoal = {"forma": "direta", "equipe_por_quantidade": False, "remuneracao_mensal": 10000, "encargos_no_simples": "0.35", "encargos_fora_do_simples": "0.60"}
     d = {
         "estrutura": estrutura,
         "regimes": regimes or dict.fromkeys(ids, "lucro_real"),
@@ -49,6 +49,7 @@ def dados(estrutura="D", regimes=None, **alteracoes):
             "iss_transporte_municipal": "0.05",
             "dedutibilidade_entre_pjs_confirmada": True,
             "credito_fornecedor_das_reconhecido": True,
+            "credito_regular_por_atividade": {"armazenagem": True, "logistica": True},
         },
     }
     d = copy.deepcopy(d)

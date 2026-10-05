@@ -1,50 +1,107 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Cartao, Selecao } from "./componentes";
 import { Dados } from "./Dados";
 import {
-  ESTRUTURAS, REGIMES, comparar, empresasDe, formularioVazio, nomeAtividade, rotuloCenario, simular,
+  ESTRUTURAS, REGIMES, comparar, empresasDe, formularioVazio, comecarEmBranco, nomeAtividade, rotuloCenario, simular,
   type Diferenca, type Estrutura, type Formulario, type Regime, type Resultado,
 } from "./modelo";
 import { Comparacao, Resultados } from "./Resultados";
+import { carregar, lerTrabalho, salvarTrabalho, serializar } from "./configuracoes";
+import { exemploHipotetico } from "./perfis";
 
 const ETAPAS = ["Estrutura e regimes", "Dados", "Resultados"];
 
 export default function App() {
   const [etapa, setEtapa] = useState(0);
-  const [form, setForm] = useState<Formulario>(formularioVazio);
+  const [inicio] = useState(lerTrabalho);
+  const [form, definirForm] = useState<Formulario>(inicio.form);
+  const formAtual = useRef(form);
+  const [original, setOriginal] = useState<Formulario | null>(inicio.original);
   const [resultado, setResultado] = useState<Resultado | null>(null);
+  const versao = useRef(0);
+  const requisicao = useRef(false);
+  const [entradasCalculadas, setEntradasCalculadas] = useState<Formulario | null>(null);
+  function setForm(novo: Formulario, origem = original) {
+    versao.current += 1;
+    definirForm(novo);
+    formAtual.current = novo;
+    setResultado(null);
+    setEntradasCalculadas(null);
+    setErro("");
+    setComparacao(null);
+    try { salvarTrabalho(novo, origem); }
+    catch { setErro("Não foi possível guardar a cópia no navegador. Salve a configuração em arquivo."); }
+  }
   const [guardados, setGuardados] = useState<Formulario[]>([]);
   const [comparacao, setComparacao] = useState<{ resultados: Resultado[]; diferencas: Diferenca[] } | null>(null);
-  const [erro, setErro] = useState("");
+  const [erro, setErro] = useState(inicio.aviso ?? "");
   const [ocupado, setOcupado] = useState(false);
+  const [substituicao, setSubstituicao] = useState<{ novo: Formulario; origem: Formulario | null } | null>(null);
+  function substituir(novo: Formulario, origem: Formulario | null) {
+    if (JSON.stringify(formAtual.current) !== JSON.stringify(formularioVazio())) {
+      setSubstituicao({ novo, origem });
+      return;
+    }
+    aplicarSubstituicao(novo, origem);
+  }
+  function aplicarSubstituicao(novo: Formulario, origem: Formulario | null) {
+    setOriginal(origem);
+    setForm(structuredClone(novo), origem);
+    setGuardados([]);
+    setEtapa(0);
+    setSubstituicao(null);
+  }
+  function salvarArquivo() {
+    try {
+      const blob = new Blob([serializar(form, original)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a"); a.href = url; a.download = "cf-materiais-configuracao.json"; a.click(); URL.revokeObjectURL(url);
+    } catch (e) { setErro((e as Error).message); }
+  }
 
   const ativas = empresasDe(form.estrutura);
   const selecaoCompleta = form.estrutura !== "" && ativas.every((e) => form.regimes[e.id]);
 
   async function executar(acao: () => Promise<void>) {
+    if (requisicao.current) return;
+    requisicao.current = true;
     setErro("");
     setOcupado(true);
     try {
       await acao();
     } catch (e) {
-      console.error("[app] ação falhou; formulário no momento do erro:", form, e);
       setErro(e instanceof Error ? e.message : String(e));
     } finally {
+      requisicao.current = false;
       setOcupado(false);
     }
   }
 
   const calcular = () =>
     executar(async () => {
-      setResultado(await simular(form));
+      const invalido = document.querySelector<HTMLInputElement>('input[aria-invalid="true"]:not(:disabled)');
+      if (invalido) {
+        invalido.closest("details")?.setAttribute("open", "");
+        invalido.focus();
+        throw new Error("Confira o campo destacado antes de calcular.");
+      }
+      const revisao = versao.current;
+      const entradas = structuredClone(form);
+      const resposta = await simular(entradas);
+      if (revisao !== versao.current) return;
+      setResultado(resposta);
+      setEntradasCalculadas(entradas);
       setEtapa(2);
     });
 
   const guardar = () =>
     executar(async () => {
-      const lista = [...guardados, structuredClone(form)];
+      if (!resultado || !entradasCalculadas) return;
+      if (guardados.length >= 8) throw new Error("Você pode comparar até 8 cenários. Limpe os cenários guardados para iniciar outra comparação.");
+      const lista = [...guardados, structuredClone(entradasCalculadas)];
+      const resposta = lista.length >= 2 ? await comparar(lista) : null;
       setGuardados(lista);
-      setComparacao(lista.length >= 2 ? await comparar(lista) : null);
+      setComparacao(resposta);
     });
 
   return (
@@ -55,6 +112,34 @@ export default function App() {
           Simulação pontual de estruturas e regimes. Não substitui apuração fiscal nem parecer jurídico.
         </p>
       </header>
+      {substituicao && <div role="dialog" aria-modal="true" aria-labelledby="confirmar-substituicao" className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4">
+        <div className="max-w-md rounded-xl bg-white p-5 shadow-xl">
+          <h2 id="confirmar-substituicao" className="font-semibold">Substituir os dados atuais?</h2>
+          <p className="my-3 text-sm">A cópia de trabalho será substituída. Salve um arquivo antes se quiser conservar suas edições.</p>
+          <div className="flex flex-wrap gap-3">
+            <button autoFocus className="rounded-lg border px-3 py-2" onClick={() => setSubstituicao(null)}>Cancelar</button>
+            <button className="rounded-lg border px-3 py-2" onClick={salvarArquivo}>Salvar cópia atual</button>
+            <button className="rounded-lg bg-slate-900 px-3 py-2 text-white" onClick={() => aplicarSubstituicao(substituicao.novo, substituicao.origem)}>Confirmar substituição</button>
+          </div>
+        </div>
+      </div>}
+      <Cartao titulo="Dados de partida" nota="A cópia de trabalho é guardada neste navegador. Dados pré-preenchidos continuam editáveis e não confirmam validações jurídicas.">
+        <div className="flex flex-wrap items-center gap-3 text-sm">
+          <button className="underline" onClick={() => { const f = exemploHipotetico(); substituir(f, structuredClone(f)); }}>Usar dados pré-preenchidos — exemplo hipotético</button>
+          <label className="cursor-pointer underline">Carregar demonstração Excel ou configuração
+            <input className="sr-only" type="file" accept=".json,application/json" onChange={async e => {
+              const arquivo = e.target.files?.[0]; e.target.value = "";
+              if (!arquivo) return;
+              try { const d = carregar(await arquivo.text()); substituir(d.form, d.original); }
+              catch (erro) { setErro((erro as Error).message); }
+            }} />
+          </label>
+          <button className="underline" onClick={salvarArquivo}>Salvar configuração em arquivo</button>
+          <button className="underline" disabled={!original} onClick={() => original && substituir(original, original)}>Restaurar demonstração</button>
+          <button className="underline" onClick={() => substituir(comecarEmBranco(form), null)}>Começar em branco</button>
+        </div>
+        {form.perfil && <p className="mt-3 text-sm">{form.perfil.origem} · Ano {form.perfil.ano} · Configuração {form.perfil.data}<br />{form.perfil.aviso}</p>}
+      </Cartao>
 
       <nav className="mb-6 flex gap-2">
         {ETAPAS.map((nome, i) => (
@@ -130,19 +215,21 @@ export default function App() {
         </div>
       )}
 
-      {etapa === 2 && resultado && (
+      {etapa === 2 && resultado && entradasCalculadas && (
         <div className="space-y-4">
-          <Resultados resultado={resultado} titulo={rotuloCenario(form)} />
+          <Resultados resultado={resultado} titulo={rotuloCenario(entradasCalculadas)} />
           <Acoes>
-            <Botao aoClicar={guardar} desabilitado={ocupado} secundario>
+            <Botao aoClicar={guardar} desabilitado={ocupado || guardados.length >= 8} secundario>
               Guardar cenário para comparar
             </Botao>
           </Acoes>
+          <p className="text-sm text-slate-600">{guardados.length}/8 cenários guardados para comparação nesta sessão. O formulário permanece na cópia de trabalho do navegador.</p>
           {guardados.length > 0 && (
             <Comparacao
               rotulos={guardados.map(rotuloCenario)}
               comparacao={comparacao}
               aoLimpar={() => {
+                if (requisicao.current) return;
                 setGuardados([]);
                 setComparacao(null);
               }}

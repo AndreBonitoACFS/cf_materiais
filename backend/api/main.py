@@ -1,6 +1,5 @@
 """API do simulador: valida entradas, executa o motor e devolve resultados,
 memória de cálculo e pendências."""
-import json
 import logging
 import os
 
@@ -14,9 +13,9 @@ from motor.estrutura import NOMES_REGIME, Estrutura, Regime, empresas
 
 from . import schemas
 
-# Diagnóstico no terminal do uvicorn. SIMULADOR_LOG=INFO reduz o detalhe; WARNING mostra só problemas.
+# Por padrão só registra problemas, sem entradas financeiras.
 logging.basicConfig(
-    level=os.environ.get("SIMULADOR_LOG", "DEBUG").upper(),
+    level=os.environ.get("SIMULADOR_LOG", "WARNING").upper(),
     format="%(asctime)s %(levelname)-7s %(name)s | %(message)s",
     datefmt="%H:%M:%S",
 )
@@ -34,14 +33,11 @@ app.add_middleware(
 @app.exception_handler(RequestValidationError)
 async def _entrada_invalida(request: Request, erro: RequestValidationError):
     log.warning("422 em %s: entrada recusada pela validação", request.url.path)
-    for e in erro.errors():
-        log.warning("  %s: %s (recebido: %r)", " > ".join(map(str, e["loc"])), e["msg"], e.get("input"))
     return await request_validation_exception_handler(request, erro)
 
 
 def _executar(cenario: schemas.Cenario):
     dados = cenario.model_dump(mode="json")
-    log.debug("Cenário recebido:\n%s", json.dumps(dados, ensure_ascii=False, indent=2))
     try:
         resultado = simular(cenario_de_dict(dados))
     except ValueError as erro:

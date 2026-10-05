@@ -62,6 +62,11 @@ class Pessoal:
     encargos_no_simples: Decimal | None = None
     encargos_fora_do_simples: Decimal | None = None
     preco_mensal: Decimal | None = None  # terceirização
+    equipe_por_quantidade: bool = True  # clientes antigos devem optar explicitamente pela folha total
+    quantidade_funcionarios: Decimal | None = None
+    remuneracao_media_mensal: Decimal | None = None
+    custo_total_mensal: Decimal | None = None
+    encargos_componentes: dict = field(default_factory=dict)
 
 
 class TipoAjuste(str, Enum):
@@ -100,6 +105,7 @@ class BaseCF:
     custo_pessoal_embutido_anual: Decimal | None = None
     ajustes_ponte: list = field(default_factory=list)
     reconciliacao_confirmada: bool | None = None
+    receita_sujeita_presuncao: Recorrente = Recorrente()
 
 
 @dataclass
@@ -112,6 +118,8 @@ class ConfigPJ:
     exclusoes_csll: Decimal | None = None
     credito_ibs_mensal: Decimal | None = None
     credito_cbs_mensal: Decimal | None = None
+    credito_adicional_ibs_mensal: Decimal | None = None
+    credito_adicional_cbs_mensal: Decimal | None = None
 
 
 class Transporte(str, Enum):
@@ -129,6 +137,12 @@ class ConfigContabil:
     dedutibilidade_entre_pjs_confirmada: bool | None = None
     credito_fornecedor_das_reconhecido: bool | None = None
     por_papel: dict = field(default_factory=dict)  # papel -> ConfigPJ
+    metodo_credito: str = "manter_projecao"
+    categorias: dict = field(default_factory=dict)
+    credito_regular_por_atividade: dict = field(default_factory=dict)
+    preco_entre_pjs_com_tributo_acrescido: bool = False
+    demais_tributos_receita: Decimal | None = None
+    validacoes_pendentes: list = field(default_factory=list)
 
 
 @dataclass
@@ -192,6 +206,7 @@ def _logistica(d) -> Logistica:
 
 
 def _pessoal(d) -> Pessoal:
+    d = {"equipe_por_quantidade": True, **(d or {})}
     return _campos(
         Pessoal,
         d,
@@ -201,6 +216,11 @@ def _pessoal(d) -> Pessoal:
             "encargos_no_simples": _dec,
             "encargos_fora_do_simples": _dec,
             "preco_mensal": _dec,
+            "equipe_por_quantidade": bool,
+            "quantidade_funcionarios": _dec,
+            "remuneracao_media_mensal": _dec,
+            "custo_total_mensal": _dec,
+            "encargos_componentes": lambda v: {k: _dec(x) for k, x in (v or {}).items()},
         },
     )
 
@@ -233,13 +253,20 @@ def _base_cf(d) -> BaseCF:
         custo_pessoal_embutido_anual=_dec(d.get("custo_pessoal_embutido_anual")),
         ajustes_ponte=ajustes,
         reconciliacao_confirmada=d.get("reconciliacao_confirmada"),
+        receita_sujeita_presuncao=_rec(d.get("receita_sujeita_presuncao")),
     )
 
 
 def _config(d) -> ConfigContabil:
     d = d or {}
-    campos_pj = ("adicoes_irpj", "exclusoes_irpj", "adicoes_csll", "exclusoes_csll", "credito_ibs_mensal", "credito_cbs_mensal")
+    campos_pj = ("adicoes_irpj", "exclusoes_irpj", "adicoes_csll", "exclusoes_csll", "credito_ibs_mensal", "credito_cbs_mensal", "credito_adicional_ibs_mensal", "credito_adicional_cbs_mensal")
     return ConfigContabil(
+        demais_tributos_receita=_dec(d.get("demais_tributos_receita")),
+        validacoes_pendentes=d.get("validacoes_pendentes") or [],
+        metodo_credito=d.get("metodo_credito", "manter_projecao"),
+        categorias=d.get("categorias") or {},
+        credito_regular_por_atividade=d.get("credito_regular_por_atividade") or {},
+        preco_entre_pjs_com_tributo_acrescido=d.get("preco_entre_pjs_com_tributo_acrescido", False),
         bases_cf=[_base_cf(b) for b in d.get("bases_cf") or []],
         resultado_referencia_anual=_dec(d.get("resultado_referencia_anual")),
         transporte_enquadramento=_enum(Transporte, d.get("transporte_enquadramento")),

@@ -1,4 +1,5 @@
-import type { ReactNode } from "react";
+import { erroNumero, moeda, numero } from "./modelo";
+import { useId, type ReactNode } from "react";
 
 export function Cartao({ titulo, nota, children }: { titulo: string; nota?: string; children: ReactNode }) {
   return (
@@ -12,17 +13,26 @@ export function Cartao({ titulo, nota, children }: { titulo: string; nota?: stri
 
 /** Campo numérico em texto: vazio permanece vazio (não é zero). */
 export function Campo(props: { rotulo: string; unidade: string; valor: string | undefined; aoMudar: (v: string) => void; dica?: string }) {
+  const id = useId();
+  const erro = erroNumero(props.valor, props.unidade, /Resultado|Referência/i.test(props.rotulo));
+  const reconhecido = !erro ? numero(props.valor) : null;
   return (
     <label className="block text-sm">
       <span className="font-medium text-slate-700">{props.rotulo}</span>
       <span className="mt-1 flex items-center rounded-lg border border-slate-300 bg-white focus-within:border-slate-900">
         <input
           inputMode="decimal"
+          aria-label={props.rotulo}
+          aria-invalid={!!erro}
+          aria-describedby={id}
           value={props.valor ?? ""}
           onChange={(e) => props.aoMudar(e.target.value)}
           className="w-full min-w-0 rounded-lg px-2 py-1.5 outline-none"
         />
         <span className="whitespace-nowrap px-2 text-xs text-slate-500">{props.unidade}</span>
+      </span>
+      <span id={id} className={`mt-0.5 block text-xs ${erro ? "text-red-700" : "text-slate-500"}`}>
+        {erro || (reconhecido !== null && props.unidade.startsWith("R$") ? `Valor reconhecido: ${moeda(reconhecido)}` : "")}
       </span>
       {props.dica && <span className="mt-0.5 block text-xs text-slate-500">{props.dica}</span>}
     </label>

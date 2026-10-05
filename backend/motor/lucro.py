@@ -36,10 +36,10 @@ def lucro_real(base_irpj: Decimal, base_csll: Decimal, p: Parametros) -> IrpjCsl
     return IrpjCsll(base_irpj, base_csll, _irpj(base_irpj, p), _csll(base_csll, p))
 
 
-def lucro_presumido(receitas: dict, presuncoes: dict, p: Parametros) -> IrpjCsll:
+def lucro_presumido(receitas: dict, presuncoes: dict, p: Parametros, receita_bruta: Decimal | None = None) -> IrpjCsll:
     """receitas: atividade -> receita anual do CNPJ; presuncoes: atividade ->
     (presunção IRPJ, presunção CSLL). Agregação e adicional uma vez por CNPJ."""
-    total = soma(receitas.values())
+    total = soma(receitas.values()) if receita_bruta is None else receita_bruta
     if total <= 0:  # sem receita: sem base e sem divisão por zero
         return IrpjCsll(ZERO, ZERO, ZERO, ZERO, Decimal(1))
     excedente = max(ZERO, total - p.obter("lc224_limite"))

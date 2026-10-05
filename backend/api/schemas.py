@@ -3,7 +3,7 @@ dado informado. Valores monetários e alíquotas são decimais (texto ou número
 from decimal import Decimal
 from typing import Annotated
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from motor.entradas import FormaPessoal, TipoAjuste, Transporte
 from motor.estrutura import Atividade, Estrutura, Regime
@@ -47,6 +47,26 @@ class Pessoal(_Modelo):
     encargos_no_simples: NaoNegativo | None = None
     encargos_fora_do_simples: NaoNegativo | None = None
     preco_mensal: NaoNegativo | None = None
+    equipe_por_quantidade: bool = True
+    quantidade_funcionarios: Annotated[int, Field(ge=0)] | None = None
+    remuneracao_media_mensal: NaoNegativo | None = None
+    custo_total_mensal: NaoNegativo | None = None
+    encargos_componentes: dict[str, Aliquota | None] = {}
+
+    @model_validator(mode="before")
+    @classmethod
+    def apenas_modalidade_ativa(cls, dados):
+        if isinstance(dados, dict):
+            dados = dict(dados)
+            if dados.get("forma") == FormaPessoal.TERCEIRIZACAO:
+                for k in ("quantidade_funcionarios", "remuneracao_media_mensal", "remuneracao_mensal", "encargos_no_simples", "encargos_fora_do_simples", "custo_total_mensal"):
+                    dados[k] = None
+                dados["encargos_componentes"] = {}
+            elif dados.get("forma") == FormaPessoal.DIRETA:
+                dados["preco_mensal"] = None
+                if str(dados.get("quantidade_funcionarios")) == "0":
+                    dados["remuneracao_media_mensal"] = None
+        return dados
 
 
 class AjustePonte(_Modelo):
@@ -59,6 +79,7 @@ class AjustePonte(_Modelo):
 class BaseCF(_Modelo):
     regime: Regime
     receita_comercio: Valor = None
+    receita_sujeita_presuncao: Valor = None
     resultado_antes_irpj_csll_anual: Decimal | None = None
     das_embutido_anual: NaoNegativo | None = None
     historico_receita: Annotated[list[NaoNegativo], Field(min_length=13, max_length=13)] | None = None
@@ -78,9 +99,22 @@ class ConfigPJ(_Modelo):
     exclusoes_csll: NaoNegativo | None = None
     credito_ibs_mensal: NaoNegativo | None = None
     credito_cbs_mensal: NaoNegativo | None = None
+    credito_adicional_ibs_mensal: NaoNegativo | None = None
+    credito_adicional_cbs_mensal: NaoNegativo | None = None
+
+
+class Categoria(_Modelo):
+    custo_bruto_mensal: NaoNegativo | None = None
+    percentual_elegivel: Aliquota | None = None
 
 
 class ConfigContabil(_Modelo):
+    demais_tributos_receita: Aliquota | None = None
+    validacoes_pendentes: list[str] = []
+    metodo_credito: Annotated[str, Field(pattern="^(manter_projecao|categorias)$")] = "manter_projecao"
+    categorias: dict[Atividade, dict[str, Categoria]] = {}
+    credito_regular_por_atividade: dict[Atividade, bool | None] = {}
+    preco_entre_pjs_com_tributo_acrescido: bool = False
     bases_cf: list[BaseCF] = []
     resultado_referencia_anual: Decimal | None = None
     transporte_enquadramento: Transporte | None = None

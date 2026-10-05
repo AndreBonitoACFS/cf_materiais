@@ -1,4 +1,5 @@
 import { Campo, Cartao, Grade, Selecao } from "./componentes";
+import { Custos } from "./Custos";
 import {
   REGIMES, baseVazia, eRegular, eSimples, empresasDe, nomeAtividade,
   type Atividade, type Base, type Formulario, type Regime, type SimNao,
@@ -30,7 +31,7 @@ export function Dados({ form, setForm }: Props) {
   return (
     <>
       <p className="text-sm text-slate-600">
-        Informe a <strong>média mensal</strong>; a conversão para o ano é interna. Campo vazio não é zero: digite 0 quando o valor for zero.
+        Informe a <strong>média mensal</strong>; a conversão para o ano é interna. Campo vazio não é zero: digite 0 quando o valor for zero. Use o padrão brasileiro: 25.000 significa vinte e cinco mil; 25,50 significa vinte e cinco reais e cinquenta centavos. Ponto decimal não é aceito.
       </p>
 
       <Cartao titulo="Galpões" nota={`Os três galpões são unidades de uma única empresa. ${destinoCf("armazenagem")}`}>
@@ -90,18 +91,28 @@ export function Dados({ form, setForm }: Props) {
                   />
                   {p.forma === "direta" && (
                     <>
-                      <Campo rotulo="Remuneração" unidade={MES} valor={p.remuneracao_mensal} aoMudar={pessoal(a, "remuneracao_mensal")} />
-                      {simples ? (
+                      {a !== "comercio" ? <>
+                        <Campo rotulo="Quantidade de empregados próprios" unidade="pessoas" valor={p.quantidade_funcionarios} aoMudar={pessoal(a, "quantidade_funcionarios")} dica={a === "armazenagem" ? "Uma equipe cobre os três galpões." : undefined} />
+                        {p.quantidade_funcionarios !== "0" && <Campo rotulo="Remuneração média por empregado" unidade="R$/pessoa/mês" valor={p.remuneracao_media_mensal} aoMudar={pessoal(a, "remuneracao_media_mensal")} dica="Antes dos encargos; inclua a média de verbas remuneratórias adotada." />}
+                      </> : <>
+                        <Campo rotulo="Custo total com encargos da CF" unidade={MES} valor={p.custo_total_mensal} aoMudar={pessoal(a, "custo_total_mensal")} dica="Usado uma vez. Vazio permite a remuneração abaixo; não preencher ambos." />
+                        {!p.custo_total_mensal && <Campo rotulo="Remuneração da CF antes dos encargos" unidade={MES} valor={p.remuneracao_mensal} aoMudar={pessoal(a, "remuneracao_mensal")} />}
+                      </>}
+                      {(!p.custo_total_mensal || a !== "comercio") && (a === "comercio" || p.quantidade_funcionarios !== "0") && <>
+                      <Selecao rotulo="Configuração de encargos" valor={p.encargos_detalhados ?? "nao"} aoMudar={pessoal(a, "encargos_detalhados")} opcoes={[["nao", "Totais com e sem CPP"], ["sim", "CPP, FGTS, férias, 13º, benefícios e outros"]]} />
+                      {p.encargos_detalhados === "sim" ? <>
+                        {[["cpp", "CPP"], ["fgts", "FGTS"], ["ferias", "Férias"], ["decimo_terceiro", "13º"], ["beneficios", "Benefícios"], ["outros_encargos", "Outros encargos"]].filter(([k]) => k !== "cpp" || !simples).map(([k, titulo]) => <Campo key={k} rotulo={titulo} unidade="%" valor={p[k]} aoMudar={pessoal(a, k)} />)}
+                      </> : <>
                         <Campo
-                          rotulo="Encargos no Simples" unidade="% da remuneração" valor={p.encargos_no_simples} aoMudar={pessoal(a, "encargos_no_simples")}
+                          rotulo="Encargos sem CPP" unidade="% da remuneração" valor={p.encargos_no_simples} aoMudar={pessoal(a, "encargos_no_simples")}
                           dica="Sem CPP patronal, que está no DAS."
                         />
-                      ) : (
+                      {!simples && (
                         <Campo
                           rotulo="Encargos fora do Simples" unidade="% da remuneração" valor={p.encargos_fora_do_simples}
                           aoMudar={pessoal(a, "encargos_fora_do_simples")} dica="Inclui a contribuição patronal."
                         />
-                      )}
+                      )}</>}</>}
                     </>
                   )}
                   {p.forma === "terceirizacao" && (
@@ -114,6 +125,7 @@ export function Dados({ form, setForm }: Props) {
         </div>
       </Cartao>
 
+      <Custos form={form} setForm={setForm} />
       <Contabilidade form={form} setForm={setForm} />
     </>
   );
@@ -143,7 +155,9 @@ function Contabilidade({ form, setForm }: Props) {
       <p className="text-xs text-slate-500">Uma base por regime da CF. Ao trocar o regime, a base de outro regime não é reaproveitada.</p>
       <div className="mt-2">
         <Grade>
+          <Campo rotulo="Demais tributos sobre receitas de serviços" unidade="%" valor={form.config.demais_tributos_receita} aoMudar={config("demais_tributos_receita")} dica="Vazio não é zero. Comércio mantém a projeção embutida na base." />
           <Campo rotulo="Receita do comércio (projeção 2027)" unidade={MES} valor={base.campos.receita_comercio} aoMudar={campoBase("receita_comercio")} />
+          {regimeCf === "lucro_presumido" && <Campo rotulo="Receita sujeita à presunção" unidade={MES} valor={base.campos.receita_sujeita_presuncao} aoMudar={campoBase("receita_sujeita_presuncao")} dica="Vazio mantém a receita do comércio. Não altera a receita bruta para limites." />}
           <Campo
             rotulo="Resultado antes de IRPJ/CSLL" unidade="R$/ano" valor={base.campos.resultado_antes_irpj_csll_anual}
             aoMudar={campoBase("resultado_antes_irpj_csll_anual")} dica="Com despesas e tributos indiretos do comércio já embutidos."
@@ -198,7 +212,7 @@ function Contabilidade({ form, setForm }: Props) {
         </div>
       ))}
       <button
-        onClick={() => setBase({ ...base, ajustes: [...base.ajustes, { id: `ajuste-${base.ajustes.length + 1}`, tipo: "custo_antigo_substituido", descricao: "", valor_anual: "" }] })}
+        onClick={() => setBase({ ...base, ajustes: [...base.ajustes, { id: `ajuste-${crypto.randomUUID()}`, tipo: "custo_antigo_substituido", descricao: "", valor_anual: "" }] })}
         className="mt-2 text-sm font-medium text-slate-900 underline"
       >
         Adicionar ajuste
@@ -209,6 +223,8 @@ function Contabilidade({ form, setForm }: Props) {
       </label>
 
       <h3 className="mt-5 text-sm font-semibold">Referência e premissas</h3>
+      <label className="my-3 flex gap-2 text-sm"><input type="checkbox" checked={form.tributoAcrescido ?? false} onChange={e => setForm({ ...form, tributoAcrescido: e.target.checked })} />Serviços entre PJs regulares: acrescentar IBS/CBS ao preço-base pago pela CF</label>
+      {(["armazenagem", "logistica"] as Atividade[]).map(a => <Selecao key={a} rotulo={`Crédito de serviços regulares de ${nomeAtividade(a)}`} valor={form.creditoRegular?.[a] ?? ""} aoMudar={v => setForm({ ...form, creditoRegular: { ...form.creditoRegular, [a]: v as SimNao } })} opcoes={[["sim", "Confirmado elegível"], ["nao", "Confirmado não elegível"]]} vazio="Pendente — crédito não liberado" />)}
       <div className="mt-2">
         <Grade>
           <Campo
@@ -253,8 +269,12 @@ function Contabilidade({ form, setForm }: Props) {
                     <Campo rotulo="Exclusões — CSLL" unidade="R$/ano" valor={c.exclusoes_csll} aoMudar={papel(e.papel, "exclusoes_csll")} />
                   </>
                 )}
-                <Campo rotulo="Crédito de IBS sobre aquisições de terceiros" unidade={MES} valor={c.credito_ibs_mensal} aoMudar={papel(e.papel, "credito_ibs_mensal")} dica="Valor informado pela contabilidade." />
-                <Campo rotulo="Crédito de CBS sobre aquisições de terceiros" unidade={MES} valor={c.credito_cbs_mensal} aoMudar={papel(e.papel, "credito_cbs_mensal")} dica="Valor informado pela contabilidade." />
+                {form.metodoCredito !== "categorias" && <>
+                  <Campo rotulo="Crédito operacional de IBS atual" unidade={MES} valor={c.credito_ibs_mensal} aoMudar={papel(e.papel, "credito_ibs_mensal")} dica="Substituído pelo método de categorias." />
+                  <Campo rotulo="Crédito operacional de CBS atual" unidade={MES} valor={c.credito_cbs_mensal} aoMudar={papel(e.papel, "credito_cbs_mensal")} dica="Substituído pelo método de categorias." />
+                </>}
+                <Campo rotulo="Crédito adicional documentado de IBS" unidade={MES} valor={c.credito_adicional_ibs_mensal} aoMudar={papel(e.papel, "credito_adicional_ibs_mensal")} dica="Ex.: pessoal terceirizado. Excluir notas já usadas nas categorias ou nos serviços entre PJs." />
+                <Campo rotulo="Crédito adicional documentado de CBS" unidade={MES} valor={c.credito_adicional_cbs_mensal} aoMudar={papel(e.papel, "credito_adicional_cbs_mensal")} dica="Não estimar pelo total da folha nem duplicar notas." />
               </Grade>
             </div>
           </div>

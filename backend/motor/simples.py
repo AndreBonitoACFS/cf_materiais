@@ -69,7 +69,7 @@ def rbt12_mensal(receita_total: list, nova: bool, historico: tuple | None) -> li
     return [soma(linha[m : m + 12]) for m in range(MESES)]
 
 
-def _impedimentos(receita_total: list, nova: bool, historico: tuple | None, p: Parametros, notas: list) -> list:
+def _impedimentos(receita_total: list, nova: bool, historico: tuple | None, p: Parametros, notas: list, aproximado=False) -> list:
     sublimite, limite = p.obter("simples_sublimite"), p.obter("simples_limite")
     tolerancia = 1 + p.obter("simples_tolerancia_excesso")
     total = soma(receita_total)
@@ -92,11 +92,11 @@ def _impedimentos(receita_total: list, nova: bool, historico: tuple | None, p: P
     if anterior > limite:
         raise Indisponivel(
             Status.INELEGIVEL,
-            [f"Receita bruta de 2026 (R$ {moeda(anterior)}) acima do limite do Simples Nacional (R$ {moeda(limite)})."],
+            [f"{'Receita usada na aproximação do RBT12, sem histórico comprovado' if aproximado else 'Receita bruta de 2026'} (R$ {moeda(anterior)}) acima do limite do Simples Nacional (R$ {moeda(limite)})."],
         )
     impedido = anterior > sublimite
     if impedido:
-        notas.append("Receita de 2026 acima do sublimite: IBS, ICMS e ISS fora do DAS durante 2027.")
+        notas.append(f"{'Receita aproximada para o RBT12' if aproximado else 'Receita de 2026'} acima do sublimite: IBS, ICMS e ISS fora do DAS durante 2027.")
     situacao, acumulado = [], ZERO
     for m, receita in enumerate(receita_total):
         situacao.append(impedido)
@@ -148,12 +148,13 @@ def apurar_simples(receitas: dict, *, nova: bool, regular: bool, historico: tupl
     """receitas: atividade -> 12 receitas mensais tributáveis do CNPJ. A faixa usa
     a receita total do CNPJ; os componentes são segregados por atividade."""
     notas, aproximacoes = [], []
+    aproximado = not nova and historico is None
     receita_total = [soma(r[m] for r in receitas.values()) for m in range(MESES)]
     if not nova and historico is None:
         media = soma(receita_total) / MESES
         historico = (media,) * 13
         aproximacoes.append("RBT12 sem histórico informado: aproximado pela receita anual de 2027 distribuída uniformemente.")
-    impedimentos = _impedimentos(receita_total, nova, historico, p, notas)
+    impedimentos = _impedimentos(receita_total, nova, historico, p, notas, aproximado)
     rbt12s = rbt12_mensal(receita_total, nova, historico)
 
     meses = []
