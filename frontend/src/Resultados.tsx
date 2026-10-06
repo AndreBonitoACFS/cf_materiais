@@ -60,7 +60,7 @@ function Empresa({ e }: { e: ResultadoPJ }) {
             <Linha rotulo="CPP total adicional" valor={e.pessoal_totais?.cpp_anual} />
             <Linha rotulo="Pessoal direto e terceirizado — total anual" valor={e.pessoal_totais?.custo_anual} />
           </div>}
-          <Linha rotulo="Resultado" valor={e.resultado} forte />
+          <Linha rotulo={e.nome.includes("63.715.056") ? "Resultado histórico após IRPJ/CSLL — estimativa" : "Resultado"} valor={e.resultado} forte />
         </div>
       ) : (
         <ul className="mt-2 list-disc pl-5 text-sm text-slate-700">
@@ -101,7 +101,7 @@ export function Resultados({ resultado, titulo }: { resultado: Resultado; titulo
             <Linha rotulo="Receita externa" valor={c.receita_externa} />
             <Linha rotulo="Custos externos" valor={c.custos_externos} />
             <Linha rotulo="Tributos" valor={c.tributos} />
-            <Linha rotulo="Resultado consolidado" valor={c.resultado} forte />
+            <Linha rotulo={resultado.estrutura === "integrada" ? "Resultado histórico após IRPJ/CSLL" : "Resultado consolidado"} valor={c.resultado} forte />
             <Linha rotulo="Referência da CF" valor={c.referencia} />
             <Linha rotulo="Diferença contra a referência" valor={c.diferenca} forte />
           </div>
@@ -199,6 +199,13 @@ export function Comparacao(props: {
 }) {
   const { rotulos, comparacao } = props;
   return (
+    <>
+    {comparacao && comparacao.resultados.every(r=>r.estrutura==="integrada") && <Cartao titulo="LP → LR antes do PAT e efeito isolado do PAT">
+      <div className="overflow-x-auto"><table className="w-full text-sm text-right"><thead><tr><th className="text-left">Tributo</th>{rotulos.map((n,i)=><th key={i}>{n}</th>)}</tr></thead><tbody>
+      {["IRPJ básico","Adicional IRPJ","PAT utilizado","IRPJ líquido","CSLL","IBS","CBS","Demais tributos","Total devido","Caixa efetivo"].map(k=><tr key={k}><td className="text-left">{k}</td>{comparacao.resultados.map((r,i)=><td key={i}>{k==="PAT utilizado"&&r.empresas[0]?.regime==="lucro_presumido"?"Não se aplica":moeda(r.empresas[0]?.tributos[k])}</td>)}</tr>)}
+      </tbody></table></div>
+      {(()=>{const [lp,lr,pat]=comparacao.resultados.map(r=>r.empresas[0]?.tributos);const total=(t:typeof lp)=>t?.["IRPJ líquido"]!=null&&t?.CSLL!=null?Number(t["IRPJ líquido"])+Number(t.CSLL):null;const a=total(lp),b=total(lr),c=total(pat);return <div className="mt-3 text-sm"><p>Efeito LP → LR antes do PAT (IRPJ/CSLL; economia positiva): {a!==null&&b!==null?moeda(String(a-b)):"n/d"}</p><p>Efeito isolado PAT: {b!==null&&c!==null?moeda(String(b-c)):"n/d / pendente"}</p><p>Diferença total e caixa: n/d — componentes fiscais incompletos.</p></div>})()}
+    </Cartao>}
     <Cartao titulo="Comparação de cenários" nota="As diferenças são calculadas contra o primeiro cenário guardado.">
       {!comparacao ? (
         <p className="text-sm text-slate-700">
@@ -213,7 +220,7 @@ export function Comparacao(props: {
                 <th>Situação</th>
                 <th>Tributos</th>
                 <th>Resultado consolidado</th>
-                <th>Diferença contra o 1º</th>
+                <th>Diferença de resultado contra o 1º</th>
               </tr>
             </thead>
             <tbody>
@@ -244,5 +251,6 @@ export function Comparacao(props: {
         Limpar cenários guardados
       </button>
     </Cartao>
+    </>
   );
 }

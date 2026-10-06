@@ -1,0 +1,1575 @@
+{
+  "versao": "07-integrada-2027",
+  "base": "Documento 07; ECD/ECF 2025",
+  "hipoteses": [
+    "Ajustes e receitas segregadas não comprovados = zero, adotados explicitamente para este exemplo",
+    "Alimentação contabilizada usada como hipótese de elegibilidade pendente"
+  ],
+  "cenarios": [
+    {
+      "entradas": {
+        "estrutura": "integrada",
+        "regimes": {
+          "pj1": "lucro_presumido"
+        },
+        "config": {
+          "integrada": {
+            "trimestres": [
+              {
+                "receita": "10227223.94",
+                "presuncao": "9092778.76",
+                "resultado": "1018109.75",
+                "alimentacao": "132965.51",
+                "adicoes_irpj": "0",
+                "exclusoes_irpj": "0",
+                "adicoes_csll": "0",
+                "exclusoes_csll": "0",
+                "acrescimos_irpj": "0",
+                "acrescimos_csll": "0",
+                "servicos": "0",
+                "aluguel": "0",
+                "pat_elegivel": "132965.51"
+              },
+              {
+                "receita": "12089156.99",
+                "presuncao": "11055488.23",
+                "resultado": "1146733.62",
+                "alimentacao": "123920.63",
+                "adicoes_irpj": "0",
+                "exclusoes_irpj": "0",
+                "adicoes_csll": "0",
+                "exclusoes_csll": "0",
+                "acrescimos_irpj": "0",
+                "acrescimos_csll": "0",
+                "servicos": "0",
+                "aluguel": "0",
+                "pat_elegivel": "123920.63"
+              },
+              {
+                "receita": "12901910.25",
+                "presuncao": "11908251.25",
+                "resultado": "1072630.56",
+                "alimentacao": "108116.96",
+                "adicoes_irpj": "0",
+                "exclusoes_irpj": "0",
+                "adicoes_csll": "0",
+                "exclusoes_csll": "0",
+                "acrescimos_irpj": "0",
+                "acrescimos_csll": "0",
+                "servicos": "0",
+                "aluguel": "0",
+                "pat_elegivel": "108116.96"
+              },
+              {
+                "receita": "14186557.79",
+                "presuncao": "13115017.12",
+                "resultado": "841201.14",
+                "alimentacao": "108776.19",
+                "adicoes_irpj": "0",
+                "exclusoes_irpj": "0",
+                "adicoes_csll": "0",
+                "exclusoes_csll": "0",
+                "acrescimos_irpj": "0",
+                "acrescimos_csll": "0",
+                "servicos": "0",
+                "aluguel": "0",
+                "pat_elegivel": "108776.19"
+              }
+            ],
+            "pat": false,
+            "elegibilidade": "pendente",
+            "hipotese_pat": true
+          }
+        }
+      },
+      "resultado": {
+        "status": "simulacao_provisoria",
+        "estrutura": "integrada",
+        "empresas": [
+          {
+            "id": "pj1",
+            "nome": "CF Materiais — 63.715.056/0001-42",
+            "papel": "armazenagem+comercio+logistica",
+            "atividades": [
+              "comercio",
+              "logistica",
+              "armazenagem"
+            ],
+            "regime": "lucro_presumido",
+            "status": "simulacao_provisoria",
+            "motivos": [],
+            "receita": "49404848.97",
+            "receita_entre_pjs": "0",
+            "custos": null,
+            "despesas_entre_pjs": "0",
+            "tributos": {
+              "IRPJ básico": "590264.27",
+              "Adicional IRPJ": "369509.51",
+              "PAT utilizado": "0",
+              "IRPJ líquido": "959773.78",
+              "CSLL": "531237.83",
+              "IBS": null,
+              "CBS": null,
+              "Demais tributos": null,
+              "Total devido": null,
+              "Caixa efetivo": null
+            },
+            "total_tributos": null,
+            "creditos_utilizados": {},
+            "saldo_credor_final": {},
+            "creditos_potenciais": {},
+            "creditos_utilizados_totais": {},
+            "pessoal": [],
+            "pessoal_totais": {},
+            "resultado_antes_irpj_csll": "4078675.07",
+            "resultado": "2587663.46",
+            "ponte": [],
+            "apuracao_mensal": []
+          }
+        ],
+        "consolidado": {
+          "status": "simulacao_provisoria",
+          "receita_externa": "49404848.97",
+          "custos_externos": null,
+          "tributos": null,
+          "resultado": "2587663.46",
+          "referencia": null,
+          "diferenca": null,
+          "motivos": []
+        },
+        "pendencias": [
+          {
+            "mensagem": "IBS/CBS, demais tributos e caixa efetivo: n/d — integração fiscal e documentos pendentes.",
+            "pj": null,
+            "bloqueante": false
+          }
+        ],
+        "hipoteses": [
+          "Estimativa com base histórica: operação, pessoal, frota e aluguel externo já incluídos na DRE; sem faturamento interno ou dedução duplicada.",
+          "Compensação de prejuízos não considerada. Sem outros incentivos concorrentes ou saldos anteriores de PAT. Não há transporte automático de excedentes.",
+          "LP: limite por CNPJ, excesso proporcional entre atividades; sem ajustes de limite entre períodos nesta estimativa.",
+          "Tributos indiretos exigem projeção fiscal complementar; CMV, folha e depreciação não geram créditos automáticos."
+        ],
+        "provisorio": [],
+        "memoria": [
+          {
+            "pj": "pj1",
+            "etapa": "1º trimestre",
+            "descricao": "Base IRPJ",
+            "formula": "8% × 9092778.76 + 32% × (0 + 0); majoração proporcional: 1 + 10% × max(receitas − 1.250.000, 0)/receitas; + 0",
+            "valor": "790164.53",
+            "unidade": "moeda"
+          },
+          {
+            "pj": "pj1",
+            "etapa": "1º trimestre",
+            "descricao": "Base CSLL",
+            "formula": "12% × 9092778.76 + 32% × (0 + 0); mesma majoração proporcional; + 0",
+            "valor": "1185246.80",
+            "unidade": "moeda"
+          },
+          {
+            "pj": "pj1",
+            "etapa": "1º trimestre",
+            "descricao": "IRPJ básico",
+            "formula": "15% × max(Base IRPJ, 0)",
+            "valor": "118524.68",
+            "unidade": "moeda"
+          },
+          {
+            "pj": "pj1",
+            "etapa": "1º trimestre",
+            "descricao": "Adicional IRPJ",
+            "formula": "10% × max(Base IRPJ − 60.000, 0)",
+            "valor": "73016.45",
+            "unidade": "moeda"
+          },
+          {
+            "pj": "pj1",
+            "etapa": "1º trimestre",
+            "descricao": "PAT utilizado",
+            "formula": "Não se aplica no LP / simulação sem incentivo no LR",
+            "valor": "0",
+            "unidade": "moeda"
+          },
+          {
+            "pj": "pj1",
+            "etapa": "1º trimestre",
+            "descricao": "IRPJ líquido",
+            "formula": "IRPJ básico + adicional − PAT utilizado",
+            "valor": "191541.13",
+            "unidade": "moeda"
+          },
+          {
+            "pj": "pj1",
+            "etapa": "1º trimestre",
+            "descricao": "CSLL",
+            "formula": "9% × max(Base CSLL, 0); inalterada pelo PAT",
+            "valor": "106672.21",
+            "unidade": "moeda"
+          },
+          {
+            "pj": "pj1",
+            "etapa": "2º trimestre",
+            "descricao": "Base IRPJ",
+            "formula": "8% × 11055488.23 + 32% × (0 + 0); majoração proporcional: 1 + 10% × max(receitas − 1.250.000, 0)/receitas; + 0",
+            "valor": "962882.96",
+            "unidade": "moeda"
+          },
+          {
+            "pj": "pj1",
+            "etapa": "2º trimestre",
+            "descricao": "Base CSLL",
+            "formula": "12% × 11055488.23 + 32% × (0 + 0); mesma majoração proporcional; + 0",
+            "valor": "1444324.45",
+            "unidade": "moeda"
+          },
+          {
+            "pj": "pj1",
+            "etapa": "2º trimestre",
+            "descricao": "IRPJ básico",
+            "formula": "15% × max(Base IRPJ, 0)",
+            "valor": "144432.44",
+            "unidade": "moeda"
+          },
+          {
+            "pj": "pj1",
+            "etapa": "2º trimestre",
+            "descricao": "Adicional IRPJ",
+            "formula": "10% × max(Base IRPJ − 60.000, 0)",
+            "valor": "90288.30",
+            "unidade": "moeda"
+          },
+          {
+            "pj": "pj1",
+            "etapa": "2º trimestre",
+            "descricao": "PAT utilizado",
+            "formula": "Não se aplica no LP / simulação sem incentivo no LR",
+            "valor": "0",
+            "unidade": "moeda"
+          },
+          {
+            "pj": "pj1",
+            "etapa": "2º trimestre",
+            "descricao": "IRPJ líquido",
+            "formula": "IRPJ básico + adicional − PAT utilizado",
+            "valor": "234720.74",
+            "unidade": "moeda"
+          },
+          {
+            "pj": "pj1",
+            "etapa": "2º trimestre",
+            "descricao": "CSLL",
+            "formula": "9% × max(Base CSLL, 0); inalterada pelo PAT",
+            "valor": "129989.20",
+            "unidade": "moeda"
+          },
+          {
+            "pj": "pj1",
+            "etapa": "3º trimestre",
+            "descricao": "Base IRPJ",
+            "formula": "8% × 11908251.25 + 32% × (0 + 0); majoração proporcional: 1 + 10% × max(receitas − 1.250.000, 0)/receitas; + 0",
+            "valor": "1037926.11",
+            "unidade": "moeda"
+          },
+          {
+            "pj": "pj1",
+            "etapa": "3º trimestre",
+            "descricao": "Base CSLL",
+            "formula": "12% × 11908251.25 + 32% × (0 + 0); mesma majoração proporcional; + 0",
+            "valor": "1556889.17",
+            "unidade": "moeda"
+          },
+          {
+            "pj": "pj1",
+            "etapa": "3º trimestre",
+            "descricao": "IRPJ básico",
+            "formula": "15% × max(Base IRPJ, 0)",
+            "valor": "155688.92",
+            "unidade": "moeda"
+          },
+          {
+            "pj": "pj1",
+            "etapa": "3º trimestre",
+            "descricao": "Adicional IRPJ",
+            "formula": "10% × max(Base IRPJ − 60.000, 0)",
+            "valor": "97792.61",
+            "unidade": "moeda"
+          },
+          {
+            "pj": "pj1",
+            "etapa": "3º trimestre",
+            "descricao": "PAT utilizado",
+            "formula": "Não se aplica no LP / simulação sem incentivo no LR",
+            "valor": "0",
+            "unidade": "moeda"
+          },
+          {
+            "pj": "pj1",
+            "etapa": "3º trimestre",
+            "descricao": "IRPJ líquido",
+            "formula": "IRPJ básico + adicional − PAT utilizado",
+            "valor": "253481.53",
+            "unidade": "moeda"
+          },
+          {
+            "pj": "pj1",
+            "etapa": "3º trimestre",
+            "descricao": "CSLL",
+            "formula": "9% × max(Base CSLL, 0); inalterada pelo PAT",
+            "valor": "140120.02",
+            "unidade": "moeda"
+          },
+          {
+            "pj": "pj1",
+            "etapa": "4º trimestre",
+            "descricao": "Base IRPJ",
+            "formula": "8% × 13115017.12 + 32% × (0 + 0); majoração proporcional: 1 + 10% × max(receitas − 1.250.000, 0)/receitas; + 0",
+            "valor": "1144121.51",
+            "unidade": "moeda"
+          },
+          {
+            "pj": "pj1",
+            "etapa": "4º trimestre",
+            "descricao": "Base CSLL",
+            "formula": "12% × 13115017.12 + 32% × (0 + 0); mesma majoração proporcional; + 0",
+            "valor": "1716182.26",
+            "unidade": "moeda"
+          },
+          {
+            "pj": "pj1",
+            "etapa": "4º trimestre",
+            "descricao": "IRPJ básico",
+            "formula": "15% × max(Base IRPJ, 0)",
+            "valor": "171618.23",
+            "unidade": "moeda"
+          },
+          {
+            "pj": "pj1",
+            "etapa": "4º trimestre",
+            "descricao": "Adicional IRPJ",
+            "formula": "10% × max(Base IRPJ − 60.000, 0)",
+            "valor": "108412.15",
+            "unidade": "moeda"
+          },
+          {
+            "pj": "pj1",
+            "etapa": "4º trimestre",
+            "descricao": "PAT utilizado",
+            "formula": "Não se aplica no LP / simulação sem incentivo no LR",
+            "valor": "0",
+            "unidade": "moeda"
+          },
+          {
+            "pj": "pj1",
+            "etapa": "4º trimestre",
+            "descricao": "IRPJ líquido",
+            "formula": "IRPJ básico + adicional − PAT utilizado",
+            "valor": "280030.38",
+            "unidade": "moeda"
+          },
+          {
+            "pj": "pj1",
+            "etapa": "4º trimestre",
+            "descricao": "CSLL",
+            "formula": "9% × max(Base CSLL, 0); inalterada pelo PAT",
+            "valor": "154456.40",
+            "unidade": "moeda"
+          },
+          {
+            "pj": "pj1",
+            "etapa": "PAT 2027",
+            "descricao": "Parâmetro versionado",
+            "formula": "{'fator': Decimal('0.90'), 'fonte': 'LC 224/2025 art. 4; documento 07, seção 7.2'}",
+            "valor": "0.90",
+            "unidade": "fator"
+          }
+        ],
+        "parametros": {
+          "versao": "07-integrada-2027",
+          "vigencia": {
+            "inicio": "2027-01-01",
+            "fim": "2027-12-31"
+          },
+          "origem": {
+            "referencia": "CF Materiais - Simulacao Tributaria Reorganizacao 2027 - v2.5.2.xlsx",
+            "sha256": "22e1fa3d6f747126aead26cd5df4258e5f1f2bd268ae0d0d970ef30775bcb139",
+            "nota": "Valores extraídos da referência; não constituem homologação jurídica. null é ausência de configuração, não zero."
+          },
+          "parametros": {
+            "ibs": {
+              "valor": "0.001",
+              "fonte": "Referência C15; LC 214/2025",
+              "situacao": "referencia_nao_homologada"
+            },
+            "cbs": {
+              "valor": "0.088",
+              "fonte": "Referência C16; LC 214/2025",
+              "situacao": "provisorio"
+            },
+            "presuncao_irpj_comercio": {
+              "valor": "0.08",
+              "fonte": "Referência C21; Lei 9.249/1995",
+              "situacao": "referencia_nao_homologada"
+            },
+            "presuncao_csll_comercio": {
+              "valor": "0.12",
+              "fonte": "Referência C22; Lei 9.249/1995",
+              "situacao": "referencia_nao_homologada"
+            },
+            "presuncao_irpj_armazenagem": {
+              "valor": "0.32",
+              "fonte": "Referência C23; Lei 9.249/1995",
+              "situacao": "referencia_nao_homologada"
+            },
+            "presuncao_csll_armazenagem": {
+              "valor": "0.32",
+              "fonte": "Referência C24; Lei 9.249/1995",
+              "situacao": "referencia_nao_homologada"
+            },
+            "presuncao_irpj_logistica": {
+              "valor": "0.08",
+              "fonte": "Referência C25; Lei 9.249/1995",
+              "situacao": "referencia_nao_homologada"
+            },
+            "presuncao_csll_logistica": {
+              "valor": "0.12",
+              "fonte": "Referência C26; Lei 9.249/1995",
+              "situacao": "referencia_nao_homologada"
+            },
+            "lc224_limite": {
+              "valor": "5000000",
+              "fonte": "Referência C27; LC 224/2025, art. 4º",
+              "situacao": "referencia_nao_homologada"
+            },
+            "lc224_acrescimo": {
+              "valor": "0.10",
+              "fonte": "Referência C28; LC 224/2025, art. 4º",
+              "situacao": "referencia_nao_homologada"
+            },
+            "irpj_aliquota": {
+              "valor": "0.15",
+              "fonte": "Referência C29; Lei 9.249/1995",
+              "situacao": "referencia_nao_homologada"
+            },
+            "irpj_adicional": {
+              "valor": "0.10",
+              "fonte": "Referência C30; Lei 9.249/1995",
+              "situacao": "referencia_nao_homologada"
+            },
+            "irpj_parcela_isenta_adicional": {
+              "valor": "240000",
+              "fonte": "Referência C31; Lei 9.249/1995",
+              "situacao": "referencia_nao_homologada"
+            },
+            "csll_aliquota": {
+              "valor": "0.09",
+              "fonte": "Referência C32",
+              "situacao": "referencia_nao_homologada"
+            },
+            "pis": {
+              "valor": "0",
+              "fonte": "Referência C33",
+              "situacao": "referencia_nao_homologada"
+            },
+            "cofins": {
+              "valor": "0",
+              "fonte": "Referência C34",
+              "situacao": "referencia_nao_homologada"
+            },
+            "iss_armazenagem": {
+              "valor": "0.05",
+              "fonte": "Referência C35; conferir município/enquadramento",
+              "situacao": "referencia_nao_homologada"
+            },
+            "iss_transporte_municipal": {
+              "valor": null,
+              "fonte": "Referência C36",
+              "situacao": "nao_configurado"
+            },
+            "icms_transporte": {
+              "valor": null,
+              "fonte": "Referência C37",
+              "situacao": "nao_configurado"
+            },
+            "demais_tributos_receita": {
+              "valor": null,
+              "fonte": "Referência C38",
+              "situacao": "nao_configurado"
+            },
+            "simples_sublimite": {
+              "valor": "3600000",
+              "fonte": "Referência C54; LC 123/2006",
+              "situacao": "referencia_nao_homologada"
+            },
+            "simples_limite": {
+              "valor": "4800000",
+              "fonte": "Referência C55; LC 123/2006",
+              "situacao": "referencia_nao_homologada"
+            },
+            "simples_tolerancia_excesso": {
+              "valor": "0.20",
+              "fonte": "LC 123/2006; Resolução CGSN 140/2018",
+              "situacao": "referencia_nao_homologada"
+            },
+            "simples_iss_maximo": {
+              "valor": "0.05",
+              "fonte": "Referência, Anexo III 2027",
+              "situacao": "referencia_nao_homologada"
+            },
+            "simples_iss_gatilho": {
+              "valor": "0.1492537",
+              "fonte": "Referência, Anexo III 2027",
+              "situacao": "referencia_nao_homologada"
+            }
+          }
+        }
+      }
+    },
+    {
+      "entradas": {
+        "estrutura": "integrada",
+        "regimes": {
+          "pj1": "lucro_real"
+        },
+        "config": {
+          "integrada": {
+            "trimestres": [
+              {
+                "receita": "10227223.94",
+                "presuncao": "9092778.76",
+                "resultado": "1018109.75",
+                "alimentacao": "132965.51",
+                "adicoes_irpj": "0",
+                "exclusoes_irpj": "0",
+                "adicoes_csll": "0",
+                "exclusoes_csll": "0",
+                "acrescimos_irpj": "0",
+                "acrescimos_csll": "0",
+                "servicos": "0",
+                "aluguel": "0",
+                "pat_elegivel": "132965.51"
+              },
+              {
+                "receita": "12089156.99",
+                "presuncao": "11055488.23",
+                "resultado": "1146733.62",
+                "alimentacao": "123920.63",
+                "adicoes_irpj": "0",
+                "exclusoes_irpj": "0",
+                "adicoes_csll": "0",
+                "exclusoes_csll": "0",
+                "acrescimos_irpj": "0",
+                "acrescimos_csll": "0",
+                "servicos": "0",
+                "aluguel": "0",
+                "pat_elegivel": "123920.63"
+              },
+              {
+                "receita": "12901910.25",
+                "presuncao": "11908251.25",
+                "resultado": "1072630.56",
+                "alimentacao": "108116.96",
+                "adicoes_irpj": "0",
+                "exclusoes_irpj": "0",
+                "adicoes_csll": "0",
+                "exclusoes_csll": "0",
+                "acrescimos_irpj": "0",
+                "acrescimos_csll": "0",
+                "servicos": "0",
+                "aluguel": "0",
+                "pat_elegivel": "108116.96"
+              },
+              {
+                "receita": "14186557.79",
+                "presuncao": "13115017.12",
+                "resultado": "841201.14",
+                "alimentacao": "108776.19",
+                "adicoes_irpj": "0",
+                "exclusoes_irpj": "0",
+                "adicoes_csll": "0",
+                "exclusoes_csll": "0",
+                "acrescimos_irpj": "0",
+                "acrescimos_csll": "0",
+                "servicos": "0",
+                "aluguel": "0",
+                "pat_elegivel": "108776.19"
+              }
+            ],
+            "pat": false,
+            "elegibilidade": "pendente",
+            "hipotese_pat": true
+          }
+        }
+      },
+      "resultado": {
+        "status": "simulacao_provisoria",
+        "estrutura": "integrada",
+        "empresas": [
+          {
+            "id": "pj1",
+            "nome": "CF Materiais — 63.715.056/0001-42",
+            "papel": "armazenagem+comercio+logistica",
+            "atividades": [
+              "comercio",
+              "logistica",
+              "armazenagem"
+            ],
+            "regime": "lucro_real",
+            "status": "simulacao_provisoria",
+            "motivos": [],
+            "receita": "49404848.97",
+            "receita_entre_pjs": "0",
+            "custos": null,
+            "despesas_entre_pjs": "0",
+            "tributos": {
+              "IRPJ básico": "611801.25",
+              "Adicional IRPJ": "383867.51",
+              "PAT utilizado": "0",
+              "IRPJ líquido": "995668.76",
+              "CSLL": "367080.76",
+              "IBS": null,
+              "CBS": null,
+              "Demais tributos": null,
+              "Total devido": null,
+              "Caixa efetivo": null
+            },
+            "total_tributos": null,
+            "creditos_utilizados": {},
+            "saldo_credor_final": {},
+            "creditos_potenciais": {},
+            "creditos_utilizados_totais": {},
+            "pessoal": [],
+            "pessoal_totais": {},
+            "resultado_antes_irpj_csll": "4078675.07",
+            "resultado": "2715925.55",
+            "ponte": [],
+            "apuracao_mensal": []
+          }
+        ],
+        "consolidado": {
+          "status": "simulacao_provisoria",
+          "receita_externa": "49404848.97",
+          "custos_externos": null,
+          "tributos": null,
+          "resultado": "2715925.55",
+          "referencia": null,
+          "diferenca": null,
+          "motivos": []
+        },
+        "pendencias": [
+          {
+            "mensagem": "IBS/CBS, demais tributos e caixa efetivo: n/d — integração fiscal e documentos pendentes.",
+            "pj": null,
+            "bloqueante": false
+          }
+        ],
+        "hipoteses": [
+          "Estimativa com base histórica: operação, pessoal, frota e aluguel externo já incluídos na DRE; sem faturamento interno ou dedução duplicada.",
+          "Compensação de prejuízos não considerada. Sem outros incentivos concorrentes ou saldos anteriores de PAT. Não há transporte automático de excedentes.",
+          "LP: limite por CNPJ, excesso proporcional entre atividades; sem ajustes de limite entre períodos nesta estimativa.",
+          "Tributos indiretos exigem projeção fiscal complementar; CMV, folha e depreciação não geram créditos automáticos."
+        ],
+        "provisorio": [],
+        "memoria": [
+          {
+            "pj": "pj1",
+            "etapa": "1º trimestre",
+            "descricao": "Base IRPJ",
+            "formula": "1018109.75 + 0 − 0; compensação não considerada",
+            "valor": "1018109.75",
+            "unidade": "moeda"
+          },
+          {
+            "pj": "pj1",
+            "etapa": "1º trimestre",
+            "descricao": "Base CSLL",
+            "formula": "1018109.75 + 0 − 0; compensação não considerada",
+            "valor": "1018109.75",
+            "unidade": "moeda"
+          },
+          {
+            "pj": "pj1",
+            "etapa": "1º trimestre",
+            "descricao": "IRPJ básico",
+            "formula": "15% × max(Base IRPJ, 0)",
+            "valor": "152716.46",
+            "unidade": "moeda"
+          },
+          {
+            "pj": "pj1",
+            "etapa": "1º trimestre",
+            "descricao": "Adicional IRPJ",
+            "formula": "10% × max(Base IRPJ − 60.000, 0)",
+            "valor": "95810.98",
+            "unidade": "moeda"
+          },
+          {
+            "pj": "pj1",
+            "etapa": "1º trimestre",
+            "descricao": "PAT utilizado",
+            "formula": "Não se aplica no LP / simulação sem incentivo no LR",
+            "valor": "0",
+            "unidade": "moeda"
+          },
+          {
+            "pj": "pj1",
+            "etapa": "1º trimestre",
+            "descricao": "IRPJ líquido",
+            "formula": "IRPJ básico + adicional − PAT utilizado",
+            "valor": "248527.44",
+            "unidade": "moeda"
+          },
+          {
+            "pj": "pj1",
+            "etapa": "1º trimestre",
+            "descricao": "CSLL",
+            "formula": "9% × max(Base CSLL, 0); inalterada pelo PAT",
+            "valor": "91629.88",
+            "unidade": "moeda"
+          },
+          {
+            "pj": "pj1",
+            "etapa": "2º trimestre",
+            "descricao": "Base IRPJ",
+            "formula": "1146733.62 + 0 − 0; compensação não considerada",
+            "valor": "1146733.62",
+            "unidade": "moeda"
+          },
+          {
+            "pj": "pj1",
+            "etapa": "2º trimestre",
+            "descricao": "Base CSLL",
+            "formula": "1146733.62 + 0 − 0; compensação não considerada",
+            "valor": "1146733.62",
+            "unidade": "moeda"
+          },
+          {
+            "pj": "pj1",
+            "etapa": "2º trimestre",
+            "descricao": "IRPJ básico",
+            "formula": "15% × max(Base IRPJ, 0)",
+            "valor": "172010.04",
+            "unidade": "moeda"
+          },
+          {
+            "pj": "pj1",
+            "etapa": "2º trimestre",
+            "descricao": "Adicional IRPJ",
+            "formula": "10% × max(Base IRPJ − 60.000, 0)",
+            "valor": "108673.36",
+            "unidade": "moeda"
+          },
+          {
+            "pj": "pj1",
+            "etapa": "2º trimestre",
+            "descricao": "PAT utilizado",
+            "formula": "Não se aplica no LP / simulação sem incentivo no LR",
+            "valor": "0",
+            "unidade": "moeda"
+          },
+          {
+            "pj": "pj1",
+            "etapa": "2º trimestre",
+            "descricao": "IRPJ líquido",
+            "formula": "IRPJ básico + adicional − PAT utilizado",
+            "valor": "280683.40",
+            "unidade": "moeda"
+          },
+          {
+            "pj": "pj1",
+            "etapa": "2º trimestre",
+            "descricao": "CSLL",
+            "formula": "9% × max(Base CSLL, 0); inalterada pelo PAT",
+            "valor": "103206.03",
+            "unidade": "moeda"
+          },
+          {
+            "pj": "pj1",
+            "etapa": "3º trimestre",
+            "descricao": "Base IRPJ",
+            "formula": "1072630.56 + 0 − 0; compensação não considerada",
+            "valor": "1072630.56",
+            "unidade": "moeda"
+          },
+          {
+            "pj": "pj1",
+            "etapa": "3º trimestre",
+            "descricao": "Base CSLL",
+            "formula": "1072630.56 + 0 − 0; compensação não considerada",
+            "valor": "1072630.56",
+            "unidade": "moeda"
+          },
+          {
+            "pj": "pj1",
+            "etapa": "3º trimestre",
+            "descricao": "IRPJ básico",
+            "formula": "15% × max(Base IRPJ, 0)",
+            "valor": "160894.58",
+            "unidade": "moeda"
+          },
+          {
+            "pj": "pj1",
+            "etapa": "3º trimestre",
+            "descricao": "Adicional IRPJ",
+            "formula": "10% × max(Base IRPJ − 60.000, 0)",
+            "valor": "101263.06",
+            "unidade": "moeda"
+          },
+          {
+            "pj": "pj1",
+            "etapa": "3º trimestre",
+            "descricao": "PAT utilizado",
+            "formula": "Não se aplica no LP / simulação sem incentivo no LR",
+            "valor": "0",
+            "unidade": "moeda"
+          },
+          {
+            "pj": "pj1",
+            "etapa": "3º trimestre",
+            "descricao": "IRPJ líquido",
+            "formula": "IRPJ básico + adicional − PAT utilizado",
+            "valor": "262157.64",
+            "unidade": "moeda"
+          },
+          {
+            "pj": "pj1",
+            "etapa": "3º trimestre",
+            "descricao": "CSLL",
+            "formula": "9% × max(Base CSLL, 0); inalterada pelo PAT",
+            "valor": "96536.75",
+            "unidade": "moeda"
+          },
+          {
+            "pj": "pj1",
+            "etapa": "4º trimestre",
+            "descricao": "Base IRPJ",
+            "formula": "841201.14 + 0 − 0; compensação não considerada",
+            "valor": "841201.14",
+            "unidade": "moeda"
+          },
+          {
+            "pj": "pj1",
+            "etapa": "4º trimestre",
+            "descricao": "Base CSLL",
+            "formula": "841201.14 + 0 − 0; compensação não considerada",
+            "valor": "841201.14",
+            "unidade": "moeda"
+          },
+          {
+            "pj": "pj1",
+            "etapa": "4º trimestre",
+            "descricao": "IRPJ básico",
+            "formula": "15% × max(Base IRPJ, 0)",
+            "valor": "126180.17",
+            "unidade": "moeda"
+          },
+          {
+            "pj": "pj1",
+            "etapa": "4º trimestre",
+            "descricao": "Adicional IRPJ",
+            "formula": "10% × max(Base IRPJ − 60.000, 0)",
+            "valor": "78120.11",
+            "unidade": "moeda"
+          },
+          {
+            "pj": "pj1",
+            "etapa": "4º trimestre",
+            "descricao": "PAT utilizado",
+            "formula": "Não se aplica no LP / simulação sem incentivo no LR",
+            "valor": "0",
+            "unidade": "moeda"
+          },
+          {
+            "pj": "pj1",
+            "etapa": "4º trimestre",
+            "descricao": "IRPJ líquido",
+            "formula": "IRPJ básico + adicional − PAT utilizado",
+            "valor": "204300.28",
+            "unidade": "moeda"
+          },
+          {
+            "pj": "pj1",
+            "etapa": "4º trimestre",
+            "descricao": "CSLL",
+            "formula": "9% × max(Base CSLL, 0); inalterada pelo PAT",
+            "valor": "75708.10",
+            "unidade": "moeda"
+          },
+          {
+            "pj": "pj1",
+            "etapa": "PAT 2027",
+            "descricao": "Parâmetro versionado",
+            "formula": "{'fator': Decimal('0.90'), 'fonte': 'LC 224/2025 art. 4; documento 07, seção 7.2'}",
+            "valor": "0.90",
+            "unidade": "fator"
+          }
+        ],
+        "parametros": {
+          "versao": "07-integrada-2027",
+          "vigencia": {
+            "inicio": "2027-01-01",
+            "fim": "2027-12-31"
+          },
+          "origem": {
+            "referencia": "CF Materiais - Simulacao Tributaria Reorganizacao 2027 - v2.5.2.xlsx",
+            "sha256": "22e1fa3d6f747126aead26cd5df4258e5f1f2bd268ae0d0d970ef30775bcb139",
+            "nota": "Valores extraídos da referência; não constituem homologação jurídica. null é ausência de configuração, não zero."
+          },
+          "parametros": {
+            "ibs": {
+              "valor": "0.001",
+              "fonte": "Referência C15; LC 214/2025",
+              "situacao": "referencia_nao_homologada"
+            },
+            "cbs": {
+              "valor": "0.088",
+              "fonte": "Referência C16; LC 214/2025",
+              "situacao": "provisorio"
+            },
+            "presuncao_irpj_comercio": {
+              "valor": "0.08",
+              "fonte": "Referência C21; Lei 9.249/1995",
+              "situacao": "referencia_nao_homologada"
+            },
+            "presuncao_csll_comercio": {
+              "valor": "0.12",
+              "fonte": "Referência C22; Lei 9.249/1995",
+              "situacao": "referencia_nao_homologada"
+            },
+            "presuncao_irpj_armazenagem": {
+              "valor": "0.32",
+              "fonte": "Referência C23; Lei 9.249/1995",
+              "situacao": "referencia_nao_homologada"
+            },
+            "presuncao_csll_armazenagem": {
+              "valor": "0.32",
+              "fonte": "Referência C24; Lei 9.249/1995",
+              "situacao": "referencia_nao_homologada"
+            },
+            "presuncao_irpj_logistica": {
+              "valor": "0.08",
+              "fonte": "Referência C25; Lei 9.249/1995",
+              "situacao": "referencia_nao_homologada"
+            },
+            "presuncao_csll_logistica": {
+              "valor": "0.12",
+              "fonte": "Referência C26; Lei 9.249/1995",
+              "situacao": "referencia_nao_homologada"
+            },
+            "lc224_limite": {
+              "valor": "5000000",
+              "fonte": "Referência C27; LC 224/2025, art. 4º",
+              "situacao": "referencia_nao_homologada"
+            },
+            "lc224_acrescimo": {
+              "valor": "0.10",
+              "fonte": "Referência C28; LC 224/2025, art. 4º",
+              "situacao": "referencia_nao_homologada"
+            },
+            "irpj_aliquota": {
+              "valor": "0.15",
+              "fonte": "Referência C29; Lei 9.249/1995",
+              "situacao": "referencia_nao_homologada"
+            },
+            "irpj_adicional": {
+              "valor": "0.10",
+              "fonte": "Referência C30; Lei 9.249/1995",
+              "situacao": "referencia_nao_homologada"
+            },
+            "irpj_parcela_isenta_adicional": {
+              "valor": "240000",
+              "fonte": "Referência C31; Lei 9.249/1995",
+              "situacao": "referencia_nao_homologada"
+            },
+            "csll_aliquota": {
+              "valor": "0.09",
+              "fonte": "Referência C32",
+              "situacao": "referencia_nao_homologada"
+            },
+            "pis": {
+              "valor": "0",
+              "fonte": "Referência C33",
+              "situacao": "referencia_nao_homologada"
+            },
+            "cofins": {
+              "valor": "0",
+              "fonte": "Referência C34",
+              "situacao": "referencia_nao_homologada"
+            },
+            "iss_armazenagem": {
+              "valor": "0.05",
+              "fonte": "Referência C35; conferir município/enquadramento",
+              "situacao": "referencia_nao_homologada"
+            },
+            "iss_transporte_municipal": {
+              "valor": null,
+              "fonte": "Referência C36",
+              "situacao": "nao_configurado"
+            },
+            "icms_transporte": {
+              "valor": null,
+              "fonte": "Referência C37",
+              "situacao": "nao_configurado"
+            },
+            "demais_tributos_receita": {
+              "valor": null,
+              "fonte": "Referência C38",
+              "situacao": "nao_configurado"
+            },
+            "simples_sublimite": {
+              "valor": "3600000",
+              "fonte": "Referência C54; LC 123/2006",
+              "situacao": "referencia_nao_homologada"
+            },
+            "simples_limite": {
+              "valor": "4800000",
+              "fonte": "Referência C55; LC 123/2006",
+              "situacao": "referencia_nao_homologada"
+            },
+            "simples_tolerancia_excesso": {
+              "valor": "0.20",
+              "fonte": "LC 123/2006; Resolução CGSN 140/2018",
+              "situacao": "referencia_nao_homologada"
+            },
+            "simples_iss_maximo": {
+              "valor": "0.05",
+              "fonte": "Referência, Anexo III 2027",
+              "situacao": "referencia_nao_homologada"
+            },
+            "simples_iss_gatilho": {
+              "valor": "0.1492537",
+              "fonte": "Referência, Anexo III 2027",
+              "situacao": "referencia_nao_homologada"
+            }
+          }
+        }
+      }
+    },
+    {
+      "entradas": {
+        "estrutura": "integrada",
+        "regimes": {
+          "pj1": "lucro_real"
+        },
+        "config": {
+          "integrada": {
+            "trimestres": [
+              {
+                "receita": "10227223.94",
+                "presuncao": "9092778.76",
+                "resultado": "1018109.75",
+                "alimentacao": "132965.51",
+                "adicoes_irpj": "0",
+                "exclusoes_irpj": "0",
+                "adicoes_csll": "0",
+                "exclusoes_csll": "0",
+                "acrescimos_irpj": "0",
+                "acrescimos_csll": "0",
+                "servicos": "0",
+                "aluguel": "0",
+                "pat_elegivel": "132965.51"
+              },
+              {
+                "receita": "12089156.99",
+                "presuncao": "11055488.23",
+                "resultado": "1146733.62",
+                "alimentacao": "123920.63",
+                "adicoes_irpj": "0",
+                "exclusoes_irpj": "0",
+                "adicoes_csll": "0",
+                "exclusoes_csll": "0",
+                "acrescimos_irpj": "0",
+                "acrescimos_csll": "0",
+                "servicos": "0",
+                "aluguel": "0",
+                "pat_elegivel": "123920.63"
+              },
+              {
+                "receita": "12901910.25",
+                "presuncao": "11908251.25",
+                "resultado": "1072630.56",
+                "alimentacao": "108116.96",
+                "adicoes_irpj": "0",
+                "exclusoes_irpj": "0",
+                "adicoes_csll": "0",
+                "exclusoes_csll": "0",
+                "acrescimos_irpj": "0",
+                "acrescimos_csll": "0",
+                "servicos": "0",
+                "aluguel": "0",
+                "pat_elegivel": "108116.96"
+              },
+              {
+                "receita": "14186557.79",
+                "presuncao": "13115017.12",
+                "resultado": "841201.14",
+                "alimentacao": "108776.19",
+                "adicoes_irpj": "0",
+                "exclusoes_irpj": "0",
+                "adicoes_csll": "0",
+                "exclusoes_csll": "0",
+                "acrescimos_irpj": "0",
+                "acrescimos_csll": "0",
+                "servicos": "0",
+                "aluguel": "0",
+                "pat_elegivel": "108776.19"
+              }
+            ],
+            "pat": true,
+            "elegibilidade": "pendente",
+            "hipotese_pat": true
+          }
+        }
+      },
+      "resultado": {
+        "status": "simulacao_provisoria",
+        "estrutura": "integrada",
+        "empresas": [
+          {
+            "id": "pj1",
+            "nome": "CF Materiais — 63.715.056/0001-42",
+            "papel": "armazenagem+comercio+logistica",
+            "atividades": [
+              "comercio",
+              "logistica",
+              "armazenagem"
+            ],
+            "regime": "lucro_real",
+            "status": "simulacao_provisoria",
+            "motivos": [],
+            "receita": "49404848.97",
+            "receita_entre_pjs": "0",
+            "custos": null,
+            "despesas_entre_pjs": "0",
+            "tributos": {
+              "IRPJ básico": "611801.25",
+              "Adicional IRPJ": "383867.51",
+              "PAT utilizado": "22024.84",
+              "IRPJ líquido": "973643.92",
+              "CSLL": "367080.76",
+              "IBS": null,
+              "CBS": null,
+              "Demais tributos": null,
+              "Total devido": null,
+              "Caixa efetivo": null
+            },
+            "total_tributos": null,
+            "creditos_utilizados": {},
+            "saldo_credor_final": {},
+            "creditos_potenciais": {},
+            "creditos_utilizados_totais": {},
+            "pessoal": [],
+            "pessoal_totais": {},
+            "resultado_antes_irpj_csll": "4078675.07",
+            "resultado": "2737950.39",
+            "ponte": [],
+            "apuracao_mensal": []
+          }
+        ],
+        "consolidado": {
+          "status": "simulacao_provisoria",
+          "receita_externa": "49404848.97",
+          "custos_externos": null,
+          "tributos": null,
+          "resultado": "2737950.39",
+          "referencia": null,
+          "diferenca": null,
+          "motivos": []
+        },
+        "pendencias": [
+          {
+            "mensagem": "Estimativa PAT — elegibilidade pendente; hipótese autorizada, sem confirmação documental.",
+            "pj": null,
+            "bloqueante": false
+          },
+          {
+            "mensagem": "IBS/CBS, demais tributos e caixa efetivo: n/d — integração fiscal e documentos pendentes.",
+            "pj": null,
+            "bloqueante": false
+          }
+        ],
+        "hipoteses": [
+          "Estimativa com base histórica: operação, pessoal, frota e aluguel externo já incluídos na DRE; sem faturamento interno ou dedução duplicada.",
+          "Compensação de prejuízos não considerada. Sem outros incentivos concorrentes ou saldos anteriores de PAT. Não há transporte automático de excedentes.",
+          "LP: limite por CNPJ, excesso proporcional entre atividades; sem ajustes de limite entre períodos nesta estimativa.",
+          "Tributos indiretos exigem projeção fiscal complementar; CMV, folha e depreciação não geram créditos automáticos."
+        ],
+        "provisorio": [],
+        "memoria": [
+          {
+            "pj": "pj1",
+            "etapa": "1º trimestre",
+            "descricao": "Base IRPJ",
+            "formula": "1018109.75 + 0 − 0; compensação não considerada",
+            "valor": "1018109.75",
+            "unidade": "moeda"
+          },
+          {
+            "pj": "pj1",
+            "etapa": "1º trimestre",
+            "descricao": "Base CSLL",
+            "formula": "1018109.75 + 0 − 0; compensação não considerada",
+            "valor": "1018109.75",
+            "unidade": "moeda"
+          },
+          {
+            "pj": "pj1",
+            "etapa": "1º trimestre",
+            "descricao": "IRPJ básico",
+            "formula": "15% × max(Base IRPJ, 0)",
+            "valor": "152716.46",
+            "unidade": "moeda"
+          },
+          {
+            "pj": "pj1",
+            "etapa": "1º trimestre",
+            "descricao": "Adicional IRPJ",
+            "formula": "10% × max(Base IRPJ − 60.000, 0)",
+            "valor": "95810.98",
+            "unidade": "moeda"
+          },
+          {
+            "pj": "pj1",
+            "etapa": "1º trimestre",
+            "descricao": "PAT utilizado",
+            "formula": "90% × min(15% × 132965.51, 4% × IRPJ básico); elegibilidade pendente",
+            "valor": "5497.79",
+            "unidade": "moeda"
+          },
+          {
+            "pj": "pj1",
+            "etapa": "1º trimestre",
+            "descricao": "IRPJ líquido",
+            "formula": "IRPJ básico + adicional − PAT utilizado",
+            "valor": "243029.65",
+            "unidade": "moeda"
+          },
+          {
+            "pj": "pj1",
+            "etapa": "1º trimestre",
+            "descricao": "CSLL",
+            "formula": "9% × max(Base CSLL, 0); inalterada pelo PAT",
+            "valor": "91629.88",
+            "unidade": "moeda"
+          },
+          {
+            "pj": "pj1",
+            "etapa": "2º trimestre",
+            "descricao": "Base IRPJ",
+            "formula": "1146733.62 + 0 − 0; compensação não considerada",
+            "valor": "1146733.62",
+            "unidade": "moeda"
+          },
+          {
+            "pj": "pj1",
+            "etapa": "2º trimestre",
+            "descricao": "Base CSLL",
+            "formula": "1146733.62 + 0 − 0; compensação não considerada",
+            "valor": "1146733.62",
+            "unidade": "moeda"
+          },
+          {
+            "pj": "pj1",
+            "etapa": "2º trimestre",
+            "descricao": "IRPJ básico",
+            "formula": "15% × max(Base IRPJ, 0)",
+            "valor": "172010.04",
+            "unidade": "moeda"
+          },
+          {
+            "pj": "pj1",
+            "etapa": "2º trimestre",
+            "descricao": "Adicional IRPJ",
+            "formula": "10% × max(Base IRPJ − 60.000, 0)",
+            "valor": "108673.36",
+            "unidade": "moeda"
+          },
+          {
+            "pj": "pj1",
+            "etapa": "2º trimestre",
+            "descricao": "PAT utilizado",
+            "formula": "90% × min(15% × 123920.63, 4% × IRPJ básico); elegibilidade pendente",
+            "valor": "6192.36",
+            "unidade": "moeda"
+          },
+          {
+            "pj": "pj1",
+            "etapa": "2º trimestre",
+            "descricao": "IRPJ líquido",
+            "formula": "IRPJ básico + adicional − PAT utilizado",
+            "valor": "274491.04",
+            "unidade": "moeda"
+          },
+          {
+            "pj": "pj1",
+            "etapa": "2º trimestre",
+            "descricao": "CSLL",
+            "formula": "9% × max(Base CSLL, 0); inalterada pelo PAT",
+            "valor": "103206.03",
+            "unidade": "moeda"
+          },
+          {
+            "pj": "pj1",
+            "etapa": "3º trimestre",
+            "descricao": "Base IRPJ",
+            "formula": "1072630.56 + 0 − 0; compensação não considerada",
+            "valor": "1072630.56",
+            "unidade": "moeda"
+          },
+          {
+            "pj": "pj1",
+            "etapa": "3º trimestre",
+            "descricao": "Base CSLL",
+            "formula": "1072630.56 + 0 − 0; compensação não considerada",
+            "valor": "1072630.56",
+            "unidade": "moeda"
+          },
+          {
+            "pj": "pj1",
+            "etapa": "3º trimestre",
+            "descricao": "IRPJ básico",
+            "formula": "15% × max(Base IRPJ, 0)",
+            "valor": "160894.58",
+            "unidade": "moeda"
+          },
+          {
+            "pj": "pj1",
+            "etapa": "3º trimestre",
+            "descricao": "Adicional IRPJ",
+            "formula": "10% × max(Base IRPJ − 60.000, 0)",
+            "valor": "101263.06",
+            "unidade": "moeda"
+          },
+          {
+            "pj": "pj1",
+            "etapa": "3º trimestre",
+            "descricao": "PAT utilizado",
+            "formula": "90% × min(15% × 108116.96, 4% × IRPJ básico); elegibilidade pendente",
+            "valor": "5792.20",
+            "unidade": "moeda"
+          },
+          {
+            "pj": "pj1",
+            "etapa": "3º trimestre",
+            "descricao": "IRPJ líquido",
+            "formula": "IRPJ básico + adicional − PAT utilizado",
+            "valor": "256365.44",
+            "unidade": "moeda"
+          },
+          {
+            "pj": "pj1",
+            "etapa": "3º trimestre",
+            "descricao": "CSLL",
+            "formula": "9% × max(Base CSLL, 0); inalterada pelo PAT",
+            "valor": "96536.75",
+            "unidade": "moeda"
+          },
+          {
+            "pj": "pj1",
+            "etapa": "4º trimestre",
+            "descricao": "Base IRPJ",
+            "formula": "841201.14 + 0 − 0; compensação não considerada",
+            "valor": "841201.14",
+            "unidade": "moeda"
+          },
+          {
+            "pj": "pj1",
+            "etapa": "4º trimestre",
+            "descricao": "Base CSLL",
+            "formula": "841201.14 + 0 − 0; compensação não considerada",
+            "valor": "841201.14",
+            "unidade": "moeda"
+          },
+          {
+            "pj": "pj1",
+            "etapa": "4º trimestre",
+            "descricao": "IRPJ básico",
+            "formula": "15% × max(Base IRPJ, 0)",
+            "valor": "126180.17",
+            "unidade": "moeda"
+          },
+          {
+            "pj": "pj1",
+            "etapa": "4º trimestre",
+            "descricao": "Adicional IRPJ",
+            "formula": "10% × max(Base IRPJ − 60.000, 0)",
+            "valor": "78120.11",
+            "unidade": "moeda"
+          },
+          {
+            "pj": "pj1",
+            "etapa": "4º trimestre",
+            "descricao": "PAT utilizado",
+            "formula": "90% × min(15% × 108776.19, 4% × IRPJ básico); elegibilidade pendente",
+            "valor": "4542.49",
+            "unidade": "moeda"
+          },
+          {
+            "pj": "pj1",
+            "etapa": "4º trimestre",
+            "descricao": "IRPJ líquido",
+            "formula": "IRPJ básico + adicional − PAT utilizado",
+            "valor": "199757.79",
+            "unidade": "moeda"
+          },
+          {
+            "pj": "pj1",
+            "etapa": "4º trimestre",
+            "descricao": "CSLL",
+            "formula": "9% × max(Base CSLL, 0); inalterada pelo PAT",
+            "valor": "75708.10",
+            "unidade": "moeda"
+          },
+          {
+            "pj": "pj1",
+            "etapa": "PAT 2027",
+            "descricao": "Parâmetro versionado",
+            "formula": "{'fator': Decimal('0.90'), 'fonte': 'LC 224/2025 art. 4; documento 07, seção 7.2'}",
+            "valor": "0.90",
+            "unidade": "fator"
+          }
+        ],
+        "parametros": {
+          "versao": "07-integrada-2027",
+          "vigencia": {
+            "inicio": "2027-01-01",
+            "fim": "2027-12-31"
+          },
+          "origem": {
+            "referencia": "CF Materiais - Simulacao Tributaria Reorganizacao 2027 - v2.5.2.xlsx",
+            "sha256": "22e1fa3d6f747126aead26cd5df4258e5f1f2bd268ae0d0d970ef30775bcb139",
+            "nota": "Valores extraídos da referência; não constituem homologação jurídica. null é ausência de configuração, não zero."
+          },
+          "parametros": {
+            "ibs": {
+              "valor": "0.001",
+              "fonte": "Referência C15; LC 214/2025",
+              "situacao": "referencia_nao_homologada"
+            },
+            "cbs": {
+              "valor": "0.088",
+              "fonte": "Referência C16; LC 214/2025",
+              "situacao": "provisorio"
+            },
+            "presuncao_irpj_comercio": {
+              "valor": "0.08",
+              "fonte": "Referência C21; Lei 9.249/1995",
+              "situacao": "referencia_nao_homologada"
+            },
+            "presuncao_csll_comercio": {
+              "valor": "0.12",
+              "fonte": "Referência C22; Lei 9.249/1995",
+              "situacao": "referencia_nao_homologada"
+            },
+            "presuncao_irpj_armazenagem": {
+              "valor": "0.32",
+              "fonte": "Referência C23; Lei 9.249/1995",
+              "situacao": "referencia_nao_homologada"
+            },
+            "presuncao_csll_armazenagem": {
+              "valor": "0.32",
+              "fonte": "Referência C24; Lei 9.249/1995",
+              "situacao": "referencia_nao_homologada"
+            },
+            "presuncao_irpj_logistica": {
+              "valor": "0.08",
+              "fonte": "Referência C25; Lei 9.249/1995",
+              "situacao": "referencia_nao_homologada"
+            },
+            "presuncao_csll_logistica": {
+              "valor": "0.12",
+              "fonte": "Referência C26; Lei 9.249/1995",
+              "situacao": "referencia_nao_homologada"
+            },
+            "lc224_limite": {
+              "valor": "5000000",
+              "fonte": "Referência C27; LC 224/2025, art. 4º",
+              "situacao": "referencia_nao_homologada"
+            },
+            "lc224_acrescimo": {
+              "valor": "0.10",
+              "fonte": "Referência C28; LC 224/2025, art. 4º",
+              "situacao": "referencia_nao_homologada"
+            },
+            "irpj_aliquota": {
+              "valor": "0.15",
+              "fonte": "Referência C29; Lei 9.249/1995",
+              "situacao": "referencia_nao_homologada"
+            },
+            "irpj_adicional": {
+              "valor": "0.10",
+              "fonte": "Referência C30; Lei 9.249/1995",
+              "situacao": "referencia_nao_homologada"
+            },
+            "irpj_parcela_isenta_adicional": {
+              "valor": "240000",
+              "fonte": "Referência C31; Lei 9.249/1995",
+              "situacao": "referencia_nao_homologada"
+            },
+            "csll_aliquota": {
+              "valor": "0.09",
+              "fonte": "Referência C32",
+              "situacao": "referencia_nao_homologada"
+            },
+            "pis": {
+              "valor": "0",
+              "fonte": "Referência C33",
+              "situacao": "referencia_nao_homologada"
+            },
+            "cofins": {
+              "valor": "0",
+              "fonte": "Referência C34",
+              "situacao": "referencia_nao_homologada"
+            },
+            "iss_armazenagem": {
+              "valor": "0.05",
+              "fonte": "Referência C35; conferir município/enquadramento",
+              "situacao": "referencia_nao_homologada"
+            },
+            "iss_transporte_municipal": {
+              "valor": null,
+              "fonte": "Referência C36",
+              "situacao": "nao_configurado"
+            },
+            "icms_transporte": {
+              "valor": null,
+              "fonte": "Referência C37",
+              "situacao": "nao_configurado"
+            },
+            "demais_tributos_receita": {
+              "valor": null,
+              "fonte": "Referência C38",
+              "situacao": "nao_configurado"
+            },
+            "simples_sublimite": {
+              "valor": "3600000",
+              "fonte": "Referência C54; LC 123/2006",
+              "situacao": "referencia_nao_homologada"
+            },
+            "simples_limite": {
+              "valor": "4800000",
+              "fonte": "Referência C55; LC 123/2006",
+              "situacao": "referencia_nao_homologada"
+            },
+            "simples_tolerancia_excesso": {
+              "valor": "0.20",
+              "fonte": "LC 123/2006; Resolução CGSN 140/2018",
+              "situacao": "referencia_nao_homologada"
+            },
+            "simples_iss_maximo": {
+              "valor": "0.05",
+              "fonte": "Referência, Anexo III 2027",
+              "situacao": "referencia_nao_homologada"
+            },
+            "simples_iss_gatilho": {
+              "valor": "0.1492537",
+              "fonte": "Referência, Anexo III 2027",
+              "situacao": "referencia_nao_homologada"
+            }
+          }
+        }
+      }
+    }
+  ]
+}

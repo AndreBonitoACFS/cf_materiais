@@ -2,7 +2,7 @@
 // vazio (enviado como null), "0" é zero informado.
 
 export type Regime = "simples_das" | "simples_regular" | "lucro_presumido" | "lucro_real";
-export type Estrutura = "A" | "B" | "C" | "D";
+export type Estrutura = "A" | "B" | "C" | "D" | "integrada";
 export type Atividade = "comercio" | "armazenagem" | "logistica";
 type Texto = Record<string, string>;
 export type SimNao = "" | "sim" | "nao";
@@ -22,6 +22,8 @@ export interface Base {
 }
 
 export interface Formulario {
+  patPorPapel?: Record<string, {ativo:boolean; elegibilidade:string; evidencia:string; hipotese:boolean; despesa_anual:string}>;
+  integrada?: { trimestres: Texto[]; pat: boolean; elegibilidade: string; hipotese_pat: boolean; evidencia: string; origens: Record<string, unknown> };
   perfil?: { id: string; origem: string; ano: number; data: string; aviso: string; pendencias?: string[] };
   metodoCredito?: "manter_projecao" | "categorias";
   categorias?: Partial<Record<Atividade, Record<string, Texto>>>;
@@ -49,6 +51,7 @@ export const REGIMES: { id: Regime; nome: string; curto: string }[] = [
 const NOMES: Record<Atividade, string> = { comercio: "CF Principal", armazenagem: "Armazenagem", logistica: "Logística" };
 
 export const ESTRUTURAS: Record<Estrutura, Record<string, Atividade[]>> = {
+  integrada: { pj1: ["comercio", "logistica", "armazenagem"] },
   A: { pj1: ["comercio"], pj2: ["logistica", "armazenagem"] },
   B: { pj1: ["comercio", "logistica"], pj2: ["armazenagem"] },
   C: { pj1: ["comercio", "armazenagem"], pj2: ["logistica"] },
@@ -170,6 +173,8 @@ export function paraApi(f: Formulario) {
     },
     pessoal: { comercio: pessoal("comercio"), armazenagem: pessoal("armazenagem"), logistica: pessoal("logistica") },
     config: {
+      pat_por_papel: Object.fromEntries(Object.entries(f.patPorPapel??{}).map(([k,v])=>[k,{...v,despesa_anual:numero(v.despesa_anual)}])),
+      integrada: f.integrada ? { ...f.integrada, trimestres: f.integrada.trimestres.map(q => Object.fromEntries(Object.entries(q).map(([k,v]) => [k, numero(v)]))) } : {},
       demais_tributos_receita: percentual(f.config.demais_tributos_receita),
       validacoes_pendentes: f.perfil?.pendencias ?? [],
       metodo_credito: f.metodoCredito ?? "manter_projecao",
@@ -292,6 +297,7 @@ export const STATUS: Record<string, { nome: string; cor: string }> = {
 };
 
 export function rotuloCenario(f: Formulario): string {
+  if (f.estrutura === "integrada") return `Integrada / ${f.regimes.pj1 === "lucro_real" ? f.integrada?.pat ? "LR com PAT" : "LR sem PAT" : "LP"}`;
   const curto = (r: string) => REGIMES.find((x) => x.id === r)?.curto ?? "—";
   return `Estrutura ${f.estrutura} · ${empresasDe(f.estrutura).map((e) => curto(f.regimes[e.id] ?? "")).join(" / ")}`;
 }

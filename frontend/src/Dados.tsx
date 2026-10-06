@@ -30,6 +30,22 @@ export function Dados({ form, setForm }: Props) {
 
   return (
     <>
+      {ativas.map(e=>{
+        const pat=form.patPorPapel?.[e.papel]??{ativo:false,elegibilidade:"pendente",evidencia:"",hipotese:false,despesa_anual:""};
+        const atualizar=(v:typeof pat)=>setForm({...form,patPorPapel:{...form.patPorPapel,[e.papel]:v}});
+        return <Cartao key={`pat-${e.id}`} titulo={`PAT — ${e.nome}`}>
+          {form.regimes[e.id]==="lucro_real"?<>
+            <Selecao rotulo="Simular incentivo PAT?" valor={pat.ativo?"sim":"nao"} aoMudar={v=>atualizar({...pat,ativo:v==="sim"})} opcoes={SIM_NAO}/>
+            {pat.ativo&&<>
+              <Campo rotulo="Despesa elegível desta PJ" unidade="R$/ano" valor={pat.despesa_anual} aoMudar={v=>atualizar({...pat,despesa_anual:v})}/>
+              <Selecao rotulo="Elegibilidade PAT" valor={pat.elegibilidade} aoMudar={v=>atualizar({...pat,elegibilidade:v})} opcoes={[["pendente","Pendente"],["confirmada","Confirmada"],["nao_elegivel","Não elegível"]]}/>
+              <label className="block text-sm">Evidência do programa, empregados e limites<input className="block w-full border p-2" value={pat.evidencia} onChange={ev=>atualizar({...pat,evidencia:ev.target.value})}/></label>
+              <label className="block text-sm"><input type="checkbox" checked={pat.hipotese} onChange={ev=>atualizar({...pat,hipotese:ev.target.checked})}/> Autorizar hipótese de elegibilidade pendente</label>
+              <p className="text-sm">Estimativa anual uniforme. Ao transferir empregados/despesas, revise o valor elegível desta PJ. Alimentação já na DRE não será deduzida novamente.</p>
+            </>}
+          </>:<p>Não se aplica neste regime; alimentação permanece como despesa econômica.</p>}
+        </Cartao>;
+      })}
       <p className="text-sm text-slate-600">
         Informe a <strong>média mensal</strong>; a conversão para o ano é interna. Campo vazio não é zero: digite 0 quando o valor for zero. Use o padrão brasileiro: 25.000 significa vinte e cinco mil; 25,50 significa vinte e cinco reais e cinquenta centavos. Ponto decimal não é aceito.
       </p>

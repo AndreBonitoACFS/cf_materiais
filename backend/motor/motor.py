@@ -366,6 +366,21 @@ def _irpj_csll(ctx, emp, regime, receitas_anuais: dict, antes: Decimal, adicao_e
         ctx.hipotese("Lucro Real: estimativa anual por CNPJ, sem compensação de prejuízos fiscais.")
     ctx.nota(emp.id, NOMES_REGIME[regime], "IRPJ", "0,15 × base + 0,10 × max(0, base − 240.000)", r.irpj)
     ctx.nota(emp.id, NOMES_REGIME[regime], "CSLL", "0,09 × base", r.csll)
+    pat = ctx.cenario.config.pat_por_papel.get(emp.papel) or {}
+    if regime is Regime.LUCRO_REAL and pat.get("ativo"):
+        from .integrada import valor, PAT_CONFIG
+        despesa = valor(pat.get("despesa_anual"))
+        elegibilidade = pat.get("elegibilidade", "pendente")
+        if elegibilidade == "nao_elegivel" or despesa == ZERO:
+            beneficio = ZERO
+        elif despesa is None or not (pat.get("hipotese") or (elegibilidade == "confirmada" and (pat.get("evidencia") or "").strip())):
+            raise Indisponivel(Status.DADOS_INCOMPLETOS, ["PAT desta PJ: despesa/elegibilidade pendente; desative PAT para calcular o controle sem incentivo."])
+        else:
+            basico = max(ZERO, r.base_irpj) * Decimal("0.15")
+            beneficio = moeda(min(despesa * Decimal("0.15"), basico * Decimal("0.04")) * PAT_CONFIG[2027]["fator"])
+        ctx.provisoria("PAT: estimativa anual com distribuição uniforme; confirmar programa, empregados e despesas desta PJ. Transferência de custos exige atualizar a despesa elegível; valores não são copiados do controle integrado.")
+        ctx.nota(emp.id, "PAT", "PAT utilizado", "90% × min(15% × despesa elegível, 4% × IRPJ básico); sem afetar adicional/CSLL", beneficio)
+        return {"IRPJ": r.irpj - beneficio, "CSLL": r.csll}
     return {"IRPJ": r.irpj, "CSLL": r.csll}
 
 
@@ -688,6 +703,9 @@ def simular(cenario: Cenario, parametros: Parametros | None = None) -> Resultado
         return Resultado(Status.AGUARDANDO_SELECAO, cenario.estrutura, vazias, Consolidado(Status.AGUARDANDO_SELECAO), pendencias, parametros=p.descrever())
 
     regimes = {e.id: cenario.regimes[e.id] for e in ativas}
+    if cenario.estrutura.value == "integrada":
+        from .integrada import simular_integrada
+        return simular_integrada(cenario, p)
     hospedeiras = {a: (e, regimes[e.id]) for e in ativas for a in e.atividades}
     for e in ativas:
         ctx.nota(e.id, "Estrutura", f"{e.nome} — {NOMES_REGIME[regimes[e.id]]}")

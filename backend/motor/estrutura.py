@@ -5,6 +5,7 @@ from itertools import product
 
 
 class Estrutura(str, Enum):
+    INTEGRADA = "integrada"
     A = "A"
     B = "B"
     C = "C"
@@ -43,6 +44,7 @@ NOMES_ATIVIDADE = {
 
 _C, _A, _L = Atividade.COMERCIO, Atividade.ARMAZENAGEM, Atividade.LOGISTICA
 _MAPA = {
+    Estrutura.INTEGRADA: {"pj1": (_C, _L, _A)},
     Estrutura.A: {"pj1": (_C,), "pj2": (_L, _A)},
     Estrutura.B: {"pj1": (_C, _L), "pj2": (_A,)},
     Estrutura.C: {"pj1": (_C, _A), "pj2": (_L,)},
@@ -76,7 +78,7 @@ def empresas(estrutura: Estrutura) -> list:
 
 def combinacoes():
     """As 112 combinações teóricas de estrutura e regimes."""
-    for estrutura in Estrutura:
+    for estrutura in (Estrutura.A, Estrutura.B, Estrutura.C, Estrutura.D):
         ids = list(_MAPA[estrutura])
         for regimes in product(Regime, repeat=len(ids)):
             yield estrutura, dict(zip(ids, regimes))

@@ -129,6 +129,8 @@ class Transporte(str, Enum):
 
 @dataclass
 class ConfigContabil:
+    integrada: dict = field(default_factory=dict)
+    pat_por_papel: dict = field(default_factory=dict)
     bases_cf: list = field(default_factory=list)
     resultado_referencia_anual: Decimal | None = None
     transporte_enquadramento: Transporte | None = None
@@ -261,6 +263,8 @@ def _config(d) -> ConfigContabil:
     d = d or {}
     campos_pj = ("adicoes_irpj", "exclusoes_irpj", "adicoes_csll", "exclusoes_csll", "credito_ibs_mensal", "credito_cbs_mensal", "credito_adicional_ibs_mensal", "credito_adicional_cbs_mensal")
     return ConfigContabil(
+        integrada=d.get("integrada") or {},
+        pat_por_papel=d.get("pat_por_papel") or {},
         demais_tributos_receita=_dec(d.get("demais_tributos_receita")),
         validacoes_pendentes=d.get("validacoes_pendentes") or [],
         metodo_credito=d.get("metodo_credito", "manter_projecao"),

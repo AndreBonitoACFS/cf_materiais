@@ -108,7 +108,42 @@ class Categoria(_Modelo):
     percentual_elegivel: Aliquota | None = None
 
 
+class TrimestreIntegrado(_Modelo):
+    receita: NaoNegativo | None = None
+    presuncao: NaoNegativo | None = None
+    resultado: Decimal | None = None
+    alimentacao: NaoNegativo | None = None
+    servicos: NaoNegativo | None = None
+    aluguel: NaoNegativo | None = None
+    adicoes_irpj: NaoNegativo | None = None
+    exclusoes_irpj: NaoNegativo | None = None
+    adicoes_csll: NaoNegativo | None = None
+    exclusoes_csll: NaoNegativo | None = None
+    acrescimos_irpj: NaoNegativo | None = None
+    acrescimos_csll: NaoNegativo | None = None
+    pat_elegivel: NaoNegativo | None = None
+
+
+class ControleIntegrado(_Modelo):
+    trimestres: Annotated[list[TrimestreIntegrado], Field(max_length=4)] = []
+    pat: bool = False
+    elegibilidade: Annotated[str, Field(pattern="^(pendente|confirmada|nao_elegivel)$")] = "pendente"
+    hipotese_pat: bool = False
+    evidencia: str = ""
+    origens: dict = {}
+
+
+class PatPJ(_Modelo):
+    ativo: bool = False
+    elegibilidade: Annotated[str, Field(pattern="^(pendente|confirmada|nao_elegivel)$")] = "pendente"
+    evidencia: str = ""
+    hipotese: bool = False
+    despesa_anual: NaoNegativo | None = None
+
+
 class ConfigContabil(_Modelo):
+    integrada: ControleIntegrado = ControleIntegrado()
+    pat_por_papel: dict[str, PatPJ] = {}
     demais_tributos_receita: Aliquota | None = None
     validacoes_pendentes: list[str] = []
     metodo_credito: Annotated[str, Field(pattern="^(manter_projecao|categorias)$")] = "manter_projecao"

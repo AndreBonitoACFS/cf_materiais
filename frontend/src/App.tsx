@@ -8,12 +8,14 @@ import {
 import { Comparacao, Resultados } from "./Resultados";
 import { carregar, lerTrabalho, salvarTrabalho, serializar } from "./configuracoes";
 import { exemploHipotetico } from "./perfis";
+import { preencherReal, integradaVazia } from "./integrada";
+import { DadosIntegrada } from "./DadosIntegrada";
 
 const ETAPAS = ["Estrutura e regimes", "Dados", "Resultados"];
 
 export default function App() {
-  const [etapa, setEtapa] = useState(0);
   const [inicio] = useState(lerTrabalho);
+  const [etapa, setEtapa] = useState(() => inicio.form.estrutura && empresasDe(inicio.form.estrutura).every(e => inicio.form.regimes[e.id]) ? 1 : 0);
   const [form, definirForm] = useState<Formulario>(inicio.form);
   const formAtual = useRef(form);
   const [original, setOriginal] = useState<Formulario | null>(inicio.original);
@@ -32,6 +34,7 @@ export default function App() {
     try { salvarTrabalho(novo, origem); }
     catch { setErro("Não foi possível guardar a cópia no navegador. Salve a configuração em arquivo."); }
   }
+  const [preencher, setPreencher] = useState(false);
   const [guardados, setGuardados] = useState<Formulario[]>([]);
   const [comparacao, setComparacao] = useState<{ resultados: Resultado[]; diferencas: Diferenca[] } | null>(null);
   const [erro, setErro] = useState(inicio.aviso ?? "");
@@ -48,7 +51,7 @@ export default function App() {
     setOriginal(origem);
     setForm(structuredClone(novo), origem);
     setGuardados([]);
-    setEtapa(0);
+    setEtapa(novo.estrutura && empresasDe(novo.estrutura).every(e => novo.regimes[e.id]) ? 1 : 0);
     setSubstituicao(null);
   }
   function salvarArquivo() {
@@ -123,8 +126,15 @@ export default function App() {
           </div>
         </div>
       </div>}
+      {preencher && <Cartao titulo="Aplicar base real ECD/ECF 2025">
+        <p>Escolha como aplicar os valores históricos. Estrutura e regime atuais serão preservados.</p>
+        <button className="m-2 underline" onClick={()=>{setForm(preencherReal(form,true));setPreencher(false);}}>Preencher apenas campos vazios</button>
+        <button className="m-2 underline" onClick={()=>{setForm(preencherReal(form,false));setPreencher(false);}}>Substituir pelos dados da base</button>
+        <button className="m-2 underline" onClick={()=>setPreencher(false)}>Cancelar</button>
+      </Cartao>}
       <Cartao titulo="Dados de partida" nota="A cópia de trabalho é guardada neste navegador. Dados pré-preenchidos continuam editáveis e não confirmam validações jurídicas.">
         <div className="flex flex-wrap items-center gap-3 text-sm">
+          <button className="underline" onClick={()=>setPreencher(true)}>Pré-preencher com base real — ECD/ECF 2025</button>
           <button className="underline" onClick={() => { const f = exemploHipotetico(); substituir(f, structuredClone(f)); }}>Usar dados pré-preenchidos — exemplo hipotético</button>
           <label className="cursor-pointer underline">Carregar demonstração Excel ou configuração
             <input className="sr-only" type="file" accept=".json,application/json" onChange={async e => {
@@ -136,7 +146,7 @@ export default function App() {
           </label>
           <button className="underline" onClick={salvarArquivo}>Salvar configuração em arquivo</button>
           <button className="underline" disabled={!original} onClick={() => original && substituir(original, original)}>Restaurar demonstração</button>
-          <button className="underline" onClick={() => substituir(comecarEmBranco(form), null)}>Começar em branco</button>
+          <button className="underline" onClick={() => substituir(comecarEmBranco(form), null)}>Iniciar sem pré-preenchimento</button>
         </div>
         {form.perfil && <p className="mt-3 text-sm">{form.perfil.origem} · Ano {form.perfil.ano} · Configuração {form.perfil.data}<br />{form.perfil.aviso}</p>}
       </Cartao>
@@ -169,7 +179,7 @@ export default function App() {
                   onClick={() => setForm({ ...form, estrutura: id })}
                   className={`rounded-lg border p-3 text-left ${form.estrutura === id ? "border-slate-900 ring-2 ring-slate-900" : "border-slate-300"}`}
                 >
-                  <div className="font-semibold">Estrutura {id}</div>
+                  <div className="font-semibold">{id === "integrada" ? "CF integrada — um único CNPJ" : `Estrutura ${id}`}</div>
                   <ul className="mt-1 text-sm text-slate-600">
                     {empresasDe(id).map((e) => (
                       <li key={e.id}>
@@ -206,7 +216,16 @@ export default function App() {
 
       {etapa === 1 && (
         <div className="space-y-4">
-          <Dados form={form} setForm={setForm} />
+          {form.estrutura === "integrada" ? <>
+          <div className="flex flex-wrap gap-3">{["LP","LR sem PAT","LR com PAT"].map((nome,i)=><button key={nome} className="rounded border p-2" onClick={()=>setForm({...form,regimes:{...form.regimes,pj1:i===0?"lucro_presumido":"lucro_real"},integrada:{...(form.integrada??integradaVazia()),pat:i===2}})}>Integrada / {nome}</button>)}</div>
+          <DadosIntegrada form={form} setForm={setForm}/>
+          <button className="underline" disabled={ocupado} onClick={()=>executar(async()=>{
+            const revisao=versao.current;
+            const fs=[0,1,2].map(i=>({...structuredClone(form),regimes:{...form.regimes,pj1:(i===0?"lucro_presumido":"lucro_real") as Regime},integrada:{...(structuredClone(form.integrada)??integradaVazia()),pat:i===2}}));
+            const resposta=await comparar(fs); if(revisao!==versao.current)return;
+            setGuardados(fs);setComparacao(resposta);setResultado(resposta.resultados[0]);setEntradasCalculadas(fs[0]);setEtapa(2);
+          })}>Comparar Integrada / LP, LR sem PAT e LR com PAT</button>
+          </> : <Dados form={form} setForm={setForm} />}
           <Acoes>
             <Botao aoClicar={calcular} desabilitado={ocupado}>
               {ocupado ? "Calculando…" : "Calcular"}
@@ -218,6 +237,11 @@ export default function App() {
       {etapa === 2 && resultado && entradasCalculadas && (
         <div className="space-y-4">
           <Resultados resultado={resultado} titulo={rotuloCenario(entradasCalculadas)} />
+          {entradasCalculadas.estrutura !== "integrada" && <button className="underline" disabled={ocupado} onClick={()=>executar(async()=>{
+            const atual=structuredClone(entradasCalculadas);
+            const controle={...structuredClone(atual),estrutura:"integrada" as Estrutura,integrada:{...(structuredClone(atual.integrada)??integradaVazia()),pat:false}};
+            const revisao=versao.current;const fs=[controle,atual];const resposta=await comparar(fs);if(revisao!==versao.current)return;setGuardados(fs);setComparacao(resposta);
+          })}>Comparar cisão com controle integrado do mesmo regime — sem PAT no controle</button>}
           <Acoes>
             <Botao aoClicar={guardar} desabilitado={ocupado || guardados.length >= 8} secundario>
               Guardar cenário para comparar

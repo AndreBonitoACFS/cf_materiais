@@ -8,7 +8,7 @@ cliente = TestClient(app)
 
 def test_estruturas_e_parametros():
     corpo = cliente.get("/api/estruturas").json()
-    assert [e["id"] for e in corpo["estruturas"]] == ["A", "B", "C", "D"]
+    assert [e["id"] for e in corpo["estruturas"]] == ["integrada", "A", "B", "C", "D"]
     assert len(corpo["regimes"]) == 4
     parametros = cliente.get("/api/parametros").json()
     assert parametros["parametros"]["cbs"]["situacao"] == "provisorio"
