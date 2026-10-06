@@ -109,11 +109,20 @@ export default function App() {
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-8">
-      <header className="mb-6">
+      <header className="mb-6 flex items-start justify-between gap-4 sm:items-center sm:gap-6">
+        <div className="min-w-0 flex-1">
         <h1 className="text-2xl font-semibold">Simulador tributário — CF Materiais 2027</h1>
         <p className="mt-1 text-sm text-slate-600">
           Simulação pontual de estruturas e regimes. Não substitui apuração fiscal nem parecer jurídico.
         </p>
+        </div>
+        <img
+          src="/felix-e-campos-logo.jpeg"
+          alt="Félix e Campos Advogados"
+          width={522}
+          height={478}
+          className="h-auto w-24 shrink-0 rounded-md object-contain sm:w-36"
+        />
       </header>
       {substituicao && <div role="dialog" aria-modal="true" aria-labelledby="confirmar-substituicao" className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4">
         <div className="max-w-md rounded-xl bg-white p-5 shadow-xl">
