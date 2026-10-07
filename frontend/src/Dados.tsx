@@ -1,4 +1,5 @@
-import { Campo, Cartao, Grade, Selecao } from "./componentes";
+import { BotaoInfo, Campo, Cartao, FORMATO_VALORES, Grade, PainelInfo, Selecao } from "./componentes";
+import { useId, useRef, useState } from "react";
 import { Custos } from "./Custos";
 import {
   REGIMES, baseVazia, eRegular, eSimples, empresasDe, nomeAtividade,
@@ -20,7 +21,9 @@ export function Dados({ form, setForm }: Props) {
   const regimeDe = (a: Atividade) => form.regimes[ativas.find((e) => e.atividades.includes(a))!.id] ?? "";
   const naCf = (a: Atividade) => ativas[0].atividades.includes(a);
   const destinoCf = (a: Atividade) =>
-    naCf(a) ? "Referência interna: a atividade está na própria CF, sem faturamento." : "Faturado à CF por outra PJ.";
+    naCf(a)
+      ? "Nesta estrutura a atividade fica dentro da própria CF: \"Serviços para a CF\" serve só como referência, sem faturamento."
+      : "Nesta estrutura a atividade é de outra empresa: em \"Serviços para a CF\", informe o valor que ela fatura à CF.";
 
   const galpao = (i: number, campo: string) => (v: string) =>
     setForm({ ...form, galpoes: form.galpoes.map((g, j) => (j === i ? { ...g, [campo]: v } : g)) });
@@ -33,24 +36,29 @@ export function Dados({ form, setForm }: Props) {
       {ativas.map(e=>{
         const pat=form.patPorPapel?.[e.papel]??{ativo:false,elegibilidade:"pendente",evidencia:"",hipotese:false,despesa_anual:""};
         const atualizar=(v:typeof pat)=>setForm({...form,patPorPapel:{...form.patPorPapel,[e.papel]:v}});
-        return <Cartao key={`pat-${e.id}`} titulo={`PAT — ${e.nome}`}>
+        return <Cartao key={`pat-${e.id}`} titulo={`PAT — ${e.nome}`} info={<>
+          <p>O PAT só pode ser simulado quando esta empresa está no Lucro Real.</p>
+          <p>Escolha "Sim" para incluir o incentivo e informe a despesa anual de alimentação elegível <strong>desta empresa</strong>. Se empregados ou despesas forem transferidos para outra empresa da estrutura, ajuste este valor. A alimentação que já está no resultado da contabilidade não precisa ser informada de novo.</p>
+          <p>Em "Elegibilidade PAT", indique a situação. Se ela estiver pendente e você quiser simular mesmo assim, marque a autorização.</p>
+          <p>Use "Observações" para registrar livremente o que achar útil sobre o programa.</p>
+        </>}>
           {form.regimes[e.id]==="lucro_real"?<>
             <Selecao rotulo="Simular incentivo PAT?" valor={pat.ativo?"sim":"nao"} aoMudar={v=>atualizar({...pat,ativo:v==="sim"})} opcoes={SIM_NAO}/>
             {pat.ativo&&<>
               <Campo rotulo="Despesa elegível desta PJ" unidade="R$/ano" valor={pat.despesa_anual} aoMudar={v=>atualizar({...pat,despesa_anual:v})}/>
               <Selecao rotulo="Elegibilidade PAT" valor={pat.elegibilidade} aoMudar={v=>atualizar({...pat,elegibilidade:v})} opcoes={[["pendente","Pendente"],["confirmada","Confirmada"],["nao_elegivel","Não elegível"]]}/>
-              <label className="block text-sm">Evidência do programa, empregados e limites<input className="block w-full border p-2" value={pat.evidencia} onChange={ev=>atualizar({...pat,evidencia:ev.target.value})}/></label>
+              <label className="block text-sm"><span className="font-medium text-slate-700">Observações</span><textarea rows={3} className="mt-1 block w-full rounded-lg border border-slate-300 px-2 py-1.5" value={pat.evidencia} onChange={ev=>atualizar({...pat,evidencia:ev.target.value})}/></label>
               <label className="block text-sm"><input type="checkbox" checked={pat.hipotese} onChange={ev=>atualizar({...pat,hipotese:ev.target.checked})}/> Autorizar hipótese de elegibilidade pendente</label>
-              <p className="text-sm">Estimativa anual uniforme. Ao transferir empregados/despesas, revise o valor elegível desta PJ. Alimentação já na DRE não será deduzida novamente.</p>
             </>}
-          </>:<p>Não se aplica neste regime; alimentação permanece como despesa econômica.</p>}
+          </>:<p className="text-sm">Não se aplica neste regime.</p>}
         </Cartao>;
       })}
-      <p className="text-sm text-slate-600">
-        Informe a <strong>média mensal</strong>; a conversão para o ano é interna. Campo vazio não é zero: digite 0 quando o valor for zero. Use o padrão brasileiro: 25.000 significa vinte e cinco mil; 25,50 significa vinte e cinco reais e cinquenta centavos. Ponto decimal não é aceito.
-      </p>
-
-      <Cartao titulo="Galpões" nota={`Os três galpões são unidades de uma única empresa. ${destinoCf("armazenagem")}`}>
+      <Cartao titulo="Galpões" info={<>
+        <p>Para cada um dos três galpões, informe a <strong>média mensal</strong> dos serviços prestados à CF, dos serviços prestados a terceiros e dos custos operacionais. O simulador converte os valores para o ano.</p>
+        <p>Não inclua pessoal nos custos operacionais: ele é informado no quadro Pessoal.</p>
+        <p>{destinoCf("armazenagem")}</p>
+        <p>{FORMATO_VALORES}</p>
+      </>}>
         <div className="space-y-3">
           {form.galpoes.map((g, i) => (
             <div key={i}>
@@ -65,7 +73,13 @@ export function Dados({ form, setForm }: Props) {
         </div>
       </Cartao>
 
-      <Cartao titulo="Logística" nota={`Somente frota própria. ${destinoCf("logistica")}`}>
+      <Cartao titulo="Logística" info={<>
+        <p>Informe a <strong>média mensal</strong> da operação com frota própria: serviços para a CF e para terceiros, combustível, manutenção e demais despesas da frota, e outros custos operacionais. Não inclua pessoal nem depreciação nesses campos.</p>
+        <p>A depreciação é o único campo com valor <strong>anual</strong>.</p>
+        <p>Em "Frota", a quantidade e o valor dos veículos são apenas informativos e não entram no cálculo.</p>
+        <p>{destinoCf("logistica")}</p>
+        <p>{FORMATO_VALORES}</p>
+      </>}>
         <Grade>
           <Campo rotulo="Serviços para a CF" unidade={MES} valor={form.logistica.receita_cf} aoMudar={logistica("receita_cf")} />
           <Campo rotulo="Serviços para terceiros" unidade={MES} valor={form.logistica.receita_terceiros} aoMudar={logistica("receita_terceiros")} />
@@ -91,14 +105,21 @@ export function Dados({ form, setForm }: Props) {
         </details>
       </Cartao>
 
-      <Cartao titulo="Pessoal" nota="Por atividade: contratação direta ou terceirização. O custo fica na empresa responsável pela contratação.">
-        <div className="space-y-4">
+      <Cartao titulo="Pessoal" info={<>
+        <p>Para cada operação, escolha a forma de contratação:</p>
+        <ul className="list-disc pl-5">
+          <li><strong>Contratação direta</strong>: informe a quantidade de empregados, a remuneração média mensal por empregado (antes dos encargos) e os encargos em percentual da remuneração. Os encargos podem ser informados em dois totais ou detalhados item a item. No Comércio, informe o custo total com encargos ou, no lugar dele, a remuneração.</li>
+          <li><strong>Terceirização</strong>: informe o preço mensal do serviço contratado.</li>
+        </ul>
+        <p>No Comércio, deixar a forma em branco mantém o pessoal que já está na base da CF. O custo de pessoal fica na empresa que faz a contratação.</p>
+      </>}>
+        <div className="divide-y divide-dashed divide-slate-300 [&>*]:py-3 [&>*:first-child]:pt-0">
           {(["armazenagem", "logistica", "comercio"] as Atividade[]).map((a) => {
             const p = form.pessoal[a];
             const simples = eSimples(regimeDe(a));
             return (
               <div key={a}>
-                <div className="mb-1 text-sm font-medium text-slate-500">{nomeAtividade(a)}</div>
+                <div className="mb-1 text-sm font-semibold text-slate-700">- {nomeAtividade(a)}</div>
                 <Grade>
                   <Selecao
                     rotulo="Forma de contratação" valor={p.forma ?? ""} aoMudar={pessoal(a, "forma")}
@@ -159,16 +180,30 @@ function Contabilidade({ form, setForm }: Props) {
   const ajuste = (i: number, campo: string) => (v: string) =>
     setBase({ ...base, ajustes: base.ajustes.map((a, j) => (j === i ? { ...a, [campo]: v } : a)) });
   const nomeRegime = REGIMES.find((r) => r.id === regimeCf)?.nome;
+  const [info, setInfo] = useState(false);
+  const idInfo = useId();
+  const quadro = useRef<HTMLDetailsElement>(null);
 
   return (
-    <details className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-      <summary className="cursor-pointer font-semibold">Configuração da contabilidade / consultoria</summary>
-      <p className="mt-1 text-sm text-slate-600">
-        Premissas que a contabilidade prepara. O que não estiver configurado aparece como pendência no resultado; nada é presumido.
-      </p>
+    <details ref={quadro} className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+      <summary className="cursor-pointer font-semibold">
+        <span className="inline-flex items-center gap-2 align-middle">
+          Configuração da contabilidade / consultoria
+          <BotaoInfo rotulo="Configuração da contabilidade / consultoria" aberto={info} alternar={() => { const d = quadro.current; if (d && !d.open) { d.open = true; setInfo(true); } else setInfo(!info); }} painel={idInfo} />
+        </span>
+      </summary>
+      {info && <PainelInfo id={idInfo}>
+        <p>Campos preparados pela contabilidade ou consultoria. Preencha o que tiver; o simulador não presume valores para o que ficar vazio.</p>
+        <ul className="list-disc pl-5">
+          <li><strong>Base da CF</strong>: informe os valores do regime escolhido para a CF. Cada regime tem a sua própria base: ao trocar o regime, preencha a base correspondente.</li>
+          <li><strong>Ajustes da ponte de reconciliação</strong>: clique em "Adicionar ajuste" e preencha uma linha por ajuste, com identificador, tipo, descrição e valor anual. Informe cada ajuste uma única vez. Quando a contabilidade conferir a base, marque a reconciliação.</li>
+          <li><strong>Referência e premissas</strong>: informe o resultado atual da CF, usado como comparação, e as opções de tributação dos serviços e do transporte.</li>
+          <li><strong>Campos por empresa</strong>: aparecem para as empresas fora do Simples. Informe adições, exclusões e créditos na unidade indicada em cada campo.</li>
+        </ul>
+        <p>{FORMATO_VALORES}</p>
+      </PainelInfo>}
 
       <h3 className="mt-4 text-sm font-semibold">Base da CF — {nomeRegime}</h3>
-      <p className="text-xs text-slate-500">Uma base por regime da CF. Ao trocar o regime, a base de outro regime não é reaproveitada.</p>
       <div className="mt-2">
         <Grade>
           <Campo rotulo="Demais tributos sobre receitas de serviços" unidade="%" valor={form.config.demais_tributos_receita} aoMudar={config("demais_tributos_receita")} dica="Vazio não é zero. Comércio mantém a projeção embutida na base." />
@@ -215,7 +250,6 @@ function Contabilidade({ form, setForm }: Props) {
       )}
 
       <h4 className="mt-4 text-sm font-medium">Ajustes da ponte de reconciliação</h4>
-      <p className="text-xs text-slate-500">Cada ajuste é identificado e reconhecido uma única vez.</p>
       {base.ajustes.map((a, i) => (
         <div key={i} className="mt-2 grid items-end gap-2 sm:grid-cols-[1fr_1.5fr_1.5fr_1fr_auto]">
           <CampoTexto rotulo="Identificador" valor={a.id} aoMudar={ajuste(i, "id")} />

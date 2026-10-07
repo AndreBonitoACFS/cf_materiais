@@ -141,7 +141,16 @@ export default function App() {
         <button className="m-2 underline" onClick={()=>{setForm(preencherReal(form,false));setPreencher(false);}}>Substituir pelos dados da base</button>
         <button className="m-2 underline" onClick={()=>setPreencher(false)}>Cancelar</button>
       </Cartao>}
-      <Cartao titulo="Dados de partida" nota="A cópia de trabalho é guardada neste navegador. Dados pré-preenchidos continuam editáveis e não confirmam validações jurídicas.">
+      <Cartao titulo="Dados de partida" info={<>
+        <p>Escolha de onde vêm os valores iniciais do formulário:</p>
+        <ul className="list-disc pl-5">
+          <li><strong>Base real ECD/ECF 2025</strong>: preenche com os valores históricos da CF. Você escolhe se completa só os campos vazios ou se substitui tudo.</li>
+          <li><strong>Exemplo hipotético</strong>: carrega valores de exemplo para conhecer o simulador.</li>
+          <li><strong>Carregar configuração</strong>: abre um arquivo .json salvo antes neste simulador.</li>
+          <li><strong>Iniciar sem pré-preenchimento</strong>: começa com o formulário em branco.</li>
+        </ul>
+        <p>Todos os valores carregados podem ser editados. O navegador guarda uma cópia automática do trabalho; para guardar de forma permanente, use "Salvar configuração em arquivo".</p>
+      </>}>
         <div className="flex flex-wrap items-center gap-3 text-sm">
           <button className="underline" onClick={()=>setPreencher(true)}>Pré-preencher com base real — ECD/ECF 2025</button>
           <button className="underline" onClick={() => { const f = exemploHipotetico(); substituir(f, structuredClone(f)); }}>Usar dados pré-preenchidos — exemplo hipotético</button>
@@ -157,7 +166,7 @@ export default function App() {
           <button className="underline" disabled={!original} onClick={() => original && substituir(original, original)}>Restaurar demonstração</button>
           <button className="underline" onClick={() => substituir(comecarEmBranco(form), null)}>Iniciar sem pré-preenchimento</button>
         </div>
-        {form.perfil && <p className="mt-3 text-sm">{form.perfil.origem} · Ano {form.perfil.ano} · Configuração {form.perfil.data}<br />{form.perfil.aviso}</p>}
+        {form.perfil && <p className="mt-3 text-sm">{form.perfil.origem} · Ano {form.perfil.ano} · Configuração {form.perfil.data}</p>}
       </Cartao>
 
       <nav className="mb-6 flex gap-2">
@@ -201,7 +210,10 @@ export default function App() {
             </div>
           </Cartao>
           {form.estrutura && (
-            <Cartao titulo="Regime de cada empresa" nota="Cada CNPJ escolhe o seu regime de forma independente. Escolher uma opção não torna a empresa apta a utilizá-la.">
+            <Cartao titulo="Regime de cada empresa" info={<>
+              <p>Selecione um regime tributário para cada empresa da estrutura escolhida. A escolha de uma empresa não altera a das outras.</p>
+              <p>O simulador calcula o regime selecionado sem verificar se a empresa pode adotá-lo. Confira esse ponto antes de usar o resultado.</p>
+            </>}>
               <div className="grid gap-4 sm:grid-cols-3">
                 {ativas.map((e) => (
                   <Selecao
@@ -256,7 +268,7 @@ export default function App() {
               Guardar cenário para comparar
             </Botao>
           </Acoes>
-          <p className="text-sm text-slate-600">{guardados.length}/8 cenários guardados para comparação nesta sessão. O formulário permanece na cópia de trabalho do navegador.</p>
+          <p className="text-sm text-slate-600">{guardados.length}/8 cenários guardados.</p>
           {guardados.length > 0 && (
             <Comparacao
               rotulos={guardados.map(rotuloCenario)}

@@ -75,7 +75,6 @@ function Empresa({ e }: { e: ResultadoPJ }) {
 
 export function Resultados({ resultado, titulo }: { resultado: Resultado; titulo: string }) {
   const c = resultado.consolidado;
-  const avisos = resultado.pendencias.filter((p) => !p.bloqueante);
   const etapasComValor = resultado.memoria;
   return (
     <>
@@ -95,7 +94,7 @@ export function Resultados({ resultado, titulo }: { resultado: Resultado; titulo
 
       <Cartao titulo="Consolidado">
         {c.resultado === null ? (
-          <p className="text-sm text-slate-700">Indisponível: há empresa sem resultado calculado. Nenhum valor é exibido no lugar.</p>
+          <p className="text-sm text-slate-700">Indisponível: há empresa sem resultado calculado.</p>
         ) : (
           <div className="max-w-md">
             <Linha rotulo="Receita externa" valor={c.receita_externa} />
@@ -107,16 +106,6 @@ export function Resultados({ resultado, titulo }: { resultado: Resultado; titulo
           </div>
         )}
       </Cartao>
-
-      {avisos.length > 0 && (
-        <Cartao titulo="Validações pendentes">
-          <ul className="list-disc pl-5 text-sm text-slate-700">
-            {avisos.map((p) => (
-              <li key={p.mensagem}>{p.mensagem}</li>
-            ))}
-          </ul>
-        </Cartao>
-      )}
 
       {resultado.hipoteses.length > 0 && (
         <Cartao titulo="Hipóteses e limitações">
@@ -204,12 +193,15 @@ export function Comparacao(props: {
       <div className="overflow-x-auto"><table className="w-full text-sm text-right"><thead><tr><th className="text-left">Tributo</th>{rotulos.map((n,i)=><th key={i}>{n}</th>)}</tr></thead><tbody>
       {["IRPJ básico","Adicional IRPJ","PAT utilizado","IRPJ líquido","CSLL","IBS","CBS","Demais tributos","Total devido","Caixa efetivo"].map(k=><tr key={k}><td className="text-left">{k}</td>{comparacao.resultados.map((r,i)=><td key={i}>{k==="PAT utilizado"&&r.empresas[0]?.regime==="lucro_presumido"?"Não se aplica":moeda(r.empresas[0]?.tributos[k])}</td>)}</tr>)}
       </tbody></table></div>
-      {(()=>{const [lp,lr,pat]=comparacao.resultados.map(r=>r.empresas[0]?.tributos);const total=(t:typeof lp)=>t?.["IRPJ líquido"]!=null&&t?.CSLL!=null?Number(t["IRPJ líquido"])+Number(t.CSLL):null;const a=total(lp),b=total(lr),c=total(pat);return <div className="mt-3 text-sm"><p>Efeito LP → LR antes do PAT (IRPJ/CSLL; economia positiva): {a!==null&&b!==null?moeda(String(a-b)):"n/d"}</p><p>Efeito isolado PAT: {b!==null&&c!==null?moeda(String(b-c)):"n/d / pendente"}</p><p>Diferença total e caixa: n/d — componentes fiscais incompletos.</p></div>})()}
+      {(()=>{const [lp,lr,pat]=comparacao.resultados.map(r=>r.empresas[0]?.tributos);const total=(t:typeof lp)=>t?.["IRPJ líquido"]!=null&&t?.CSLL!=null?Number(t["IRPJ líquido"])+Number(t.CSLL):null;const a=total(lp),b=total(lr),c=total(pat);return <div className="mt-3 text-sm"><p>Efeito LP → LR antes do PAT (IRPJ/CSLL; economia positiva): {a!==null&&b!==null?moeda(String(a-b)):"n/d"}</p><p>Efeito isolado PAT: {b!==null&&c!==null?moeda(String(b-c)):"n/d"}</p></div>})()}
     </Cartao>}
-    <Cartao titulo="Comparação de cenários" nota="As diferenças são calculadas contra o primeiro cenário guardado.">
+    <Cartao titulo="Comparação de cenários" info={<>
+      <p>Depois de calcular, clique em "Guardar cenário para comparar". Depois, volte às etapas 1 ou 2, mude a estrutura, os regimes ou os dados, calcule de novo e guarde outro cenário. Você pode guardar até 8 cenários.</p>
+      <p>As diferenças são sempre calculadas contra o primeiro cenário guardado. Use "Limpar cenários guardados" para começar uma nova comparação.</p>
+    </>}>
       {!comparacao ? (
         <p className="text-sm text-slate-700">
-          1 cenário guardado ({rotulos[0]}). Volte à etapa 1, altere a estrutura ou os regimes, calcule e guarde outro cenário para comparar.
+          1 cenário guardado ({rotulos[0]}). Guarde outro cenário para comparar.
         </p>
       ) : (
         <div className="overflow-x-auto">
